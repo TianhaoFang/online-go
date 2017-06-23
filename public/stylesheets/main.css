@@ -13,3 +13,15 @@ canvas {
     padding-bottom: 100%;
     position: relative;
 }
+
+.with-padding {
+    padding-top: 54px;
+}
+
+.topicHeading {
+    padding-top: 80px;
+}
+
+.padding10 {
+    padding-top: 10px;
+}
