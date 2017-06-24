@@ -1,4 +1,4 @@
-canvas {
+#app {
     position: absolute;
     top: 0;
     left: 0;
@@ -8,10 +8,19 @@ canvas {
     max-width: 400px;
 }
 
+.full-screen {
+    position: fixed;
+    top: 54px;
+    bottom: 54px;
+    left: 5px;
+    right: 5px;
+}
+
 .wrapper {
-    height: 0;
-    padding-bottom: 100%;
-    position: relative;
+    background: gold;
+    height: 100vmin;
+    width: 100vmin;
+    object-fit: scale-down;
 }
 
 .with-padding {

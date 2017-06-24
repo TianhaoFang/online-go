@@ -9,7 +9,7 @@ function rowToPosition(rowNum) {
     return padLength + rowNum * 20;
 }
 
-canvas.onmousedown = function () {
+(function () {
     const cW = context.canvas.width;
     context.beginPath();
     context.strokeStyle = "black";
@@ -75,4 +75,4 @@ canvas.onmousedown = function () {
     context.lineWidth = 0;
     context.strokeStyle = "black";
     context.stroke();
-};
+})();
