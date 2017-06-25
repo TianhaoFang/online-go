@@ -3,8 +3,9 @@ package controllers
 import javax.inject._
 
 import com.fang.Test
-import play.api._
 import play.api.mvc._
+import upickle.default._
+import util.UParser
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -25,4 +26,10 @@ class HomeController @Inject() extends Controller {
     println(upickle.default.write(Test.User("cccddd", 16)))
     Ok(views.html.index())
   }
+
+  def test: Action[Test.User] = Action(UParser(read[Test.User])) { implicit request =>
+    Ok(request.body.toString)
+  }
+
+  val ppp:BodyParser[Test.User] = UParser(read[Test.User])
 }
