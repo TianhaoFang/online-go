@@ -8,6 +8,15 @@
     max-width: 400px;
 }
 
+.progress {
+    height: 21px;
+}
+
+.progress .progress-bar {
+    font-size: 13px;
+    line-height: 21px;
+}
+
 .full-screen {
     position: fixed;
     top: 54px;
