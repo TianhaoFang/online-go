@@ -1,3 +1,4 @@
+import com.fang.Test
 import com.thoughtworks.binding.Binding._
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Event, HTMLInputElement, Node, TextEvent}
@@ -10,6 +11,7 @@ object Main extends JSApp{
 
   override def main(): Unit = {
     println("it works")
+    println(upickle.default.write(Test.User("sdada", 8)))
     dom.render(org.scalajs.dom.document.getElementById("app"), render)
   }
 

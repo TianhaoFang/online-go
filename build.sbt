@@ -1,4 +1,5 @@
 enablePlugins(PlayScala)
+dependsOn(sharedJVM)
 
 name := """onlineGo"""
 organization := "com.fang"
@@ -7,7 +8,15 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = project in file(".")
 
-lazy val js = project
+lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
+  .settings(
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.4.3"
+  ).jsConfigure(_ enablePlugins ScalaJSWeb)
+
+lazy val sharedJVM = shared.jvm
+lazy val sharedJS = shared.js
+
+lazy val js = project.dependsOn(sharedJS)
 
 scalaJSProjects += js
 

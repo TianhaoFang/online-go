@@ -1,6 +1,8 @@
 package controllers
 
 import javax.inject._
+
+import com.fang.Test
 import play.api._
 import play.api.mvc._
 
@@ -19,6 +21,8 @@ class HomeController @Inject() extends Controller {
    * a path of `/`.
    */
   def index = Action { implicit request =>
+    println(Test.text)
+    println(upickle.default.write(Test.User("cccddd", 16)))
     Ok(views.html.index())
   }
 }
