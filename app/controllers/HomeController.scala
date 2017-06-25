@@ -2,9 +2,10 @@ package controllers
 
 import javax.inject._
 
-import com.fang.Test
+import com.fang.{Test, UserSession}
 import play.api.mvc._
 import upickle.default._
+import util.MyActions.MyAction
 import util.UParser
 
 /**
@@ -29,6 +30,15 @@ class HomeController @Inject() extends Controller {
 
   def test: Action[Test.User] = Action(UParser(read[Test.User])) { implicit request =>
     Ok(request.body.toString)
+  }
+
+  def getSession: Action[AnyContent] = MyAction{ implicit request =>
+    Ok(request.user.toString)
+  }
+
+  def postSession: Action[UserSession] = MyAction(UParser(read[UserSession])){ implicit request =>
+    request.user = Some(request.body)
+    Ok(request.user.toString)
   }
 
   val ppp:BodyParser[Test.User] = UParser(read[Test.User])

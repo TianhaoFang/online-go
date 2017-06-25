@@ -27,6 +27,7 @@ scalaVersion in Global := "2.11.11"
 
 libraryDependencies ++= Seq(filters)
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
+libraryDependencies += "com.pauldijou" %% "jwt-upickle" % "0.13.0"
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.fang.controllers._"
