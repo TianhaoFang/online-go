@@ -1,5 +1,6 @@
 package util
 
+import com.fang.Step
 import com.github.tminglei.slickpg._
 import com.github.tminglei.slickpg.array.PgArrayExtensions
 import slick.driver.JdbcProfile
@@ -17,7 +18,10 @@ trait MyPostgresDriver
   object MyApi
     extends API with ArrayImplicits with DateTimeImplicits
       with RangeImplicits with HStoreImplicits{
-    implicit val intListTypeMapper: DriverJdbcType[List[Int]] = new SimpleArrayJdbcType[Int]("integer").to(_.toList)
+    implicit val intListTypeMapper: DriverJdbcType[List[Int]] =
+      new SimpleArrayJdbcType[Int]("integer").to(_.toList)
+    implicit val stepListTypeMapper: DriverJdbcType[List[Step]] =
+      new SimpleArrayJdbcType[Int]("integer").mapTo[Step](Step.fromInt, _.toInt).to(_.toList)
   }
 }
 
