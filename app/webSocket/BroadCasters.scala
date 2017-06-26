@@ -1,6 +1,7 @@
 package webSocket
 
 import javax.inject.Inject
+import javax.inject.Singleton
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 

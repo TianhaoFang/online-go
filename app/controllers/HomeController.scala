@@ -3,7 +3,12 @@ package controllers
 import javax.inject._
 
 import com.fang.{Test, UserSession}
+import com.github.tminglei.slickpg.ExPostgresDriver
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc._
+import slick.backend.DatabaseConfig
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 import upickle.default._
 import util.MyActions.MyAction
 import util.UParser
@@ -13,8 +18,7 @@ import util.UParser
  * application's home page.
  */
 @Singleton
-class HomeController @Inject() extends Controller {
-
+class HomeController @Inject()(val dbConfigProvider: DatabaseConfigProvider) extends Controller {
   /**
    * Create an Action to render an HTML page.
    *
