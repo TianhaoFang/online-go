@@ -16,6 +16,7 @@ CREATE TABLE Friend (
   user1 VARCHAR(40) NOT NULL ,
   user2 VARCHAR(40) NOT NULL ,
   url VARCHAR(256) NOT NULL ,
+  accepted BOOLEAN NOT NULL DEFAULT FALSE ,
   PRIMARY KEY (user1, user2)
 );
 
