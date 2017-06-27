@@ -43,12 +43,15 @@ object MyActions {
           .orElse(request.cookies.get(cookieName).map(_.value))
           .flatMap(decode)
       val myRequest = new MyRequest[A](userSession, request)
-      block(myRequest).map(result => {
-        myRequest.user match {
-          case Some(session) => result.withCookies(Cookie(cookieName, encode(session)))
-          case None => result.discardingCookies(DiscardingCookie(cookieName))
-        }
-      })
+      block(myRequest)
+        .map(result => result.withHeaders("Content-Type" -> "application/json"))
+        .map(result => {
+          myRequest.user match {
+            case Some(session) => result.withCookies(Cookie(cookieName, encode(session)))
+            case None => result.discardingCookies(DiscardingCookie(cookieName))
+          }
+        })
     }
   }
+
 }

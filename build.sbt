@@ -11,6 +11,8 @@ lazy val root = project in file(".")
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.4.3"
+  ).jsSettings(
+    libraryDependencies += "org.scala-js" %%% "scalajs-java-time" % "0.2.1"
   ).jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJVM = shared.jvm
