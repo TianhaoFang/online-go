@@ -34,6 +34,10 @@ object MyActions {
 
   class MyRequest[A](var user: Option[UserSession], request: Request[A])
     extends WrappedRequest[A](request) {
+    def isValidUser(id: String): Boolean = user match {
+      case None => false
+      case Some(userSession) => userSession.id == id || userSession.role == "admin"
+    }
   }
 
   object MyAction extends ActionBuilder[MyRequest] {
@@ -44,7 +48,7 @@ object MyActions {
           .flatMap(decode)
       val myRequest = new MyRequest[A](userSession, request)
       block(myRequest)
-        .map(result => result.withHeaders("Content-Type" -> "application/json"))
+        .map(result => result.as("application/json"))
         .map(result => {
           myRequest.user match {
             case Some(session) => result.withCookies(Cookie(cookieName, encode(session)))

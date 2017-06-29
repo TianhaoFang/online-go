@@ -1,6 +1,6 @@
 package com.fang
 
-import com.fang.UserModel.NoPassword
+import com.fang.UserModel.{NoPassword, View}
 import upickle.default._
 
 case class UserModel
@@ -11,11 +11,12 @@ case class UserModel
   email: String,
   google_id: Option[String],
   image_url: Option[String]
-) /*{
-  def noPassword(): NoPassword = {
+) {
+  def noPassword: NoPassword = {
     NoPassword(username, nickname, email, google_id, image_url)
   }
-}*/
+  def toView = View(username, nickname, image_url)
+}
 
 object UserModel {
   implicit val mapper1: ReadWriter[UserModel] = macroRW[UserModel]
@@ -27,6 +28,15 @@ object UserModel {
     nickname: String,
     email: String,
     google_id: Option[String],
+    image_url: Option[String]
+  ){
+    def toView = View(username, nickname, image_url)
+  }
+
+  case class View
+  (
+    username: String,
+    nickname: String,
     image_url: Option[String]
   )
 }
