@@ -38,6 +38,8 @@ object MyActions {
       case None => false
       case Some(userSession) => userSession.id == id || userSession.role == "admin"
     }
+
+    def isAdmin: Boolean = user.isDefined && (user.get.role == "admin")
   }
 
   object MyAction extends ActionBuilder[MyRequest] {

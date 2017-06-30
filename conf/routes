@@ -5,6 +5,8 @@
 
 # An example controller showing a sample home page
 GET     /user/:userId               controllers.UserController.getUser(userId: String)
+POST    /user                       controllers.UserController.createUser()
+
 GET     /hash/:value                controllers.UserController.hash(value: String)
 
 # Map static resources from the /public folder to the /assets URL path

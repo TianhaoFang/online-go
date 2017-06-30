@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.fang.{ErrorMessage, UserModel}
 import models.{SecureHash, UserDAO}
-import play.api.mvc.{Controller, Results}
+import play.api.mvc.{Action, AnyContent, Controller, Results}
 import util.MyActions.MyAction
 import com.fang.UserModel._
 import upickle.default.{read, write}
@@ -15,9 +15,9 @@ import scala.concurrent.Future
 
 @Singleton
 class UserController @Inject()(userDAO: UserDAO) extends Controller {
-  def getUser(id: String) = MyAction.async { implicit request =>
+  def getUser(id: String): Action[AnyContent] = MyAction.async { implicit request =>
     userDAO.getUserByName(id).map {
-      case None => NotFound(write(ErrorMessage("not found for user" + id)))
+      case None => NotFound(write(ErrorMessage(s"not found for user $id")))
       case Some(user) => {
         if (request.isValidUser(id)) {
           Ok(write(user.noPassword))
@@ -33,9 +33,9 @@ class UserController @Inject()(userDAO: UserDAO) extends Controller {
     Ok(write((result, result.length)))
   }
 
-  def createUser() = MyAction.async(UParser(read[UserModel])) { implicit request =>
+  def createUser(): Action[UserModel] = MyAction.async(UParser(read[UserModel])) { implicit request =>
     val user = request.body
-    if (user.username.trim == "") {
+    if (user == null || user.username.trim == "") {
       Future.successful(BadRequest(write(ErrorMessage("username should not be null"))))
     } else {
       userDAO.getUserByName(user.username).flatMap {
@@ -43,9 +43,18 @@ class UserController @Inject()(userDAO: UserDAO) extends Controller {
         case None =>
           val hashedUser = user.copy(password = SecureHash.encode(user.password))
           userDAO.insertUser(hashedUser).map { columns =>
-            Ok(write(Map("result" -> "success")))
+            Created(write(ErrorMessage("create success")))
           }
       }
     }
+  }
+
+  def updateUser(userId: String): Action[NoPassword] = (MyAction andThen ValidUser(userId))
+    .async(UParser(read[UserModel.NoPassword])){ implicit request =>
+      val user = request.body
+      userDAO.updateUser(userId, user).map {
+        case 0 => NotFound(write(ErrorMessage("not found user")))
+        case _ => Ok(user)
+      }
   }
 }

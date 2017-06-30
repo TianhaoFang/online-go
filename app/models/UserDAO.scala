@@ -5,7 +5,7 @@ import javax.inject.Singleton
 
 import com.fang.UserModel
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.dbio.Effect
+import slick.dbio.{DBIOAction, Effect}
 import slick.driver.JdbcProfile
 import slick.profile.FixedSqlAction
 
@@ -17,6 +17,8 @@ class UserDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   extends HasDatabaseConfigProvider[JdbcProfile] {
 
   import util.MyPostgresDriver.api._
+
+  def dbs = db
 
   class UserTable(tag: Tag) extends Table[UserModel](tag, "User") {
     def username = column[String]("username", O.PrimaryKey)
@@ -43,5 +45,15 @@ class UserDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 
   def insertUser(userModel: UserModel): Future[Int] = {
     db.run(users += userModel)
+  }
+
+  def updateUser(username: String, userModel: UserModel.NoPassword): Future[Int] = {
+    db.run(
+      users.filter(_.username === username).result.headOption.flatMap{
+        case None => DBIOAction.successful(1)
+        case Some(_) =>
+          users.filter(_.username === username).map(s => (s.nickname, s.email, s.google_id, s.image_url))
+            .update(userModel.nickname, userModel.email, userModel.google_id, userModel.image_url)
+      }.transactionally)
   }
 }

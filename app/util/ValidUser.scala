@@ -12,9 +12,7 @@ class ValidUser(val id: String) extends ActionFilter[MyRequest] {
     if (request.isValidUser(id)) {
       Future.successful(None)
     } else {
-      Future.successful(Some(
-        Results.Unauthorized(write(ErrorMessage("could not find user by id")))
-      ))
+      ValidUser.genError("could not find user by id, or user not match")
     }
   }
 }
@@ -22,5 +20,19 @@ class ValidUser(val id: String) extends ActionFilter[MyRequest] {
 object ValidUser {
   def apply(id: => String):ValidUser = {
     new ValidUser(id)
+  }
+
+  def genError(message: String): Future[Some[Result]] = Future.successful(Some(
+    Results.Unauthorized(write(ErrorMessage(message)))
+  ))
+
+  object adminOnly extends ActionFilter[MyRequest] {
+    override protected def filter[A](request: MyRequest[A]): Future[Option[Result]] = {
+      if(request.isAdmin){
+        Future.successful(None)
+      }else{
+        genError("should access with admin")
+      }
+    }
   }
 }

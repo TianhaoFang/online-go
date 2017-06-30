@@ -1,7 +1,8 @@
-import com.fang.Test
-import com.thoughtworks.binding.Binding._
+package com.fang
+
+import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.raw.{Event, HTMLInputElement, Node, TextEvent}
+import org.scalajs.dom.raw.{Event, Node}
 
 import scala.scalajs.js.JSApp
 
