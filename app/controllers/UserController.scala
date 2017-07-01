@@ -54,7 +54,7 @@ class UserController @Inject()(userDAO: UserDAO) extends Controller {
       val user = request.body
       userDAO.updateUser(userId, user).map {
         case 0 => NotFound(write(ErrorMessage("not found user")))
-        case _ => Ok(user)
+        case _ => Ok(write(user))
       }
   }
 }
