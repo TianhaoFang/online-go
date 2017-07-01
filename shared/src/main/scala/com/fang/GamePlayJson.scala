@@ -9,6 +9,7 @@ case class GamePlayJson
   first_user: String,
   second_user: String,
   status: String,
+  rule: String,
   first_win: Option[Boolean],
   start_time: String,
   steps: List[Step]

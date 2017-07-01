@@ -25,6 +25,7 @@ CREATE TABLE GamePlay (
   first_user VARCHAR(40) NOT NULL ,
   second_user VARCHAR(40) NOT NULL ,
   status VARCHAR(40) NOT NULL ,
+  rule VARCHAR(40) NOT NULL ,
   first_win BOOLEAN,
   start_time TIMESTAMP NOT NULL ,
   steps INTEGER[],

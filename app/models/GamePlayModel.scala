@@ -14,11 +14,12 @@ case class GamePlayModel
   first_user: String,
   second_user: String,
   status: String,
+  rule: String,
   first_win: Option[Boolean],
   start_time: Timestamp,
   steps: List[Step]
 ){
-  def toStrId = GamePlayJson(id.toString, first_user, second_user, status, first_win, GamePlayModel.formatTimeStr(start_time), steps)
+  def toStrId = GamePlayJson(id.toString, first_user, second_user, status, rule, first_win, GamePlayModel.formatTimeStr(start_time), steps)
 }
 
 object GamePlayModel {
@@ -30,7 +31,7 @@ object GamePlayModel {
     new Timestamp(Instant.parse(str).toEpochMilli)
   }
   def fromJson(g: GamePlayJson): GamePlayModel = g match {
-    case GamePlayJson(id, first_user, second_user, status, first_win, start_time, steps) =>
-      GamePlayModel(UUID.fromString(id), first_user, second_user, status, first_win, parseTimeStr(start_time), steps)
+    case GamePlayJson(id, first_user, second_user, status, rule, first_win, start_time, steps) =>
+      GamePlayModel(UUID.fromString(id), first_user, second_user, status, rule, first_win, parseTimeStr(start_time), steps)
   }
 }

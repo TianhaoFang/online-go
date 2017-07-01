@@ -20,11 +20,12 @@ class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     def first_user = column[String]("first_user")
     def second_user = column[String]("second_user")
     def status = column[String]("status")
+    def rule = column[String]("rule")
     def first_win = column[Option[Boolean]]("first_win")
     def start_time = column[Timestamp]("start_time")
     def steps = column[List[Step]]("steps")
 
-    def * = (id, first_user, second_user, status, first_win, start_time, steps) <>
+    def * = (id, first_user, second_user, status, rule, first_win, start_time, steps) <>
       ((GamePlayModel.apply _).tupled, GamePlayModel.unapply)
   }
 }
