@@ -5,7 +5,8 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-import com.fang.{GamePlayJson, Step}
+import com.fang.GamePlayJson
+import com.fang.game.Step
 
 case class GamePlayModel
 (

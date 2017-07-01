@@ -1,4 +1,4 @@
-package com.fang
+package com.fang.game
 
 import upickle.default._
 

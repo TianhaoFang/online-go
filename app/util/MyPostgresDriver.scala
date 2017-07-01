@@ -1,6 +1,6 @@
 package util
 
-import com.fang.Step
+import com.fang.game.Step
 import com.github.tminglei.slickpg._
 import com.github.tminglei.slickpg.array.PgArrayExtensions
 import slick.driver.JdbcProfile

@@ -1,5 +1,6 @@
 package com.fang
 
+import com.fang.game.Step
 import upickle.default._
 
 case class GamePlayJson

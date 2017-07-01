@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 
-import com.fang.Step
+import com.fang.game.Step
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 
