@@ -33,9 +33,11 @@ CREATE TABLE GamePlay (
 );
 
 CREATE TABLE Admin (
-  username VARCHAR(40) NOT NULL ,
+  username VARCHAR(40) NOT NULL PRIMARY KEY ,
   password VARCHAR(256) NOT NULL
 );
+
+INSERT INTO Admin(username, password) VALUES ('admin', 'SXyGIiQfPa0MFzwf3oiDH48iXoG4S5PI3YfV0WsZdT0=');
 
 # --- !Downs
 

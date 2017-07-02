@@ -6,6 +6,13 @@
 # An example controller showing a sample home page
 GET     /user/:userId               controllers.UserController.getUser(userId: String)
 POST    /user                       controllers.UserController.createUser()
+PUT     /user/:userId               controllers.UserController.updateUser(userId: String)
+PUT     /user/:userId/password      controllers.UserController.updatePassword(userId: String)
+POST    /user/login                 controllers.UserController.login()
+GET     /login                      controllers.UserController.getLoginStatus
+DELETE  /login                      controllers.UserController.logout()
+POST    /admin/login                controllers.UserController.adminLogin()
+PUT     /admin/password             controllers.UserController.updateAdminPassword()
 
 GET     /user/:userId/friends       controllers.FriendController.getAllFriends(userId: String)
 GET     /user/:userId/friends/:fId      controllers.FriendController.getFriendById(userId, fId: String)
