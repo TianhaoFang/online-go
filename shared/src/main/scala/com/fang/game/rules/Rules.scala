@@ -8,9 +8,11 @@ object Rules {
   private def pair(gameRule: GameRule) = (gameRule.name, gameRule)
 
   val gomoku = new Gomoku
+  val reversi = new Reversi
 
   private val map: HashMap[String, GameRule] = HashMap(
-    pair(gomoku)
+    pair(gomoku),
+    pair(reversi)
   )
 
   def apply(key: String): GameRule = map.get(key) match {

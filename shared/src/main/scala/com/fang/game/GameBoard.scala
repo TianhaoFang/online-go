@@ -75,7 +75,7 @@ class GameBoard private(val boardSize: Int, private val array: Array[Int])
       for(i <- Range(0, boardSize)){
         builder.append(array(at(i, j)) match {
           case GameBoard.BLACK => "X"
-          case GameBoard.WRITE => "O"
+          case GameBoard.WHITE => "O"
           case GameBoard.EMPTY => " "
         }).append("|")
       }
@@ -93,7 +93,7 @@ object GameBoard {
 
   val BLACK = 1
   val EMPTY = 0
-  val WRITE = 2
+  val WHITE = 2
 
   def getColorByStep(step: Int): Int = {
     (step % 2) + 1
@@ -101,7 +101,7 @@ object GameBoard {
 
   def oppositeColor(color: Int): Int = color match {
     case EMPTY => EMPTY
-    case BLACK => WRITE
-    case WRITE => BLACK
+    case BLACK => WHITE
+    case WHITE => BLACK
   }
 }

@@ -20,7 +20,7 @@ class Gomoku extends GameRule {
       inLine(+1, -1) + inLine(-1, +1) - 1 >= 5
     if (win) color match {
       case GameBoard.BLACK => Status.BlackWin()
-      case GameBoard.WRITE => Status.WriteWin()
+      case GameBoard.WHITE => Status.WriteWin()
     } else {
       Status.Continue()
     }
