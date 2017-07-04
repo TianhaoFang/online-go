@@ -19,4 +19,6 @@ object Rules {
     case Some(gameRule) => gameRule
     case None => throw new NoSuchElementException(s"not find gameRule for $key")
   }
+
+  val allRules: Seq[String] = map.keySet.toSeq
 }
