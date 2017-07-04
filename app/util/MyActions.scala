@@ -40,14 +40,18 @@ object MyActions {
     }
 
     def isAdmin: Boolean = user.isDefined && (user.get.role == "admin")
+
+    def isLogin: Boolean = user.isDefined
   }
 
   object MyAction extends ActionBuilder[MyRequest] {
+    def getUserSession(request: RequestHeader): Option[UserSession] =
+      request.headers.get("Authorization").map(_.replace("Bearer", ""))
+        .orElse(request.cookies.get(cookieName).map(_.value))
+        .flatMap(decode)
+
     override def invokeBlock[A](request: Request[A], block: (MyRequest[A]) => Future[Result]): Future[Result] = {
-      val userSession: Option[UserSession] =
-        request.headers.get("Authorization").map(_.replace("Bearer", ""))
-          .orElse(request.cookies.get(cookieName).map(_.value))
-          .flatMap(decode)
+      val userSession: Option[UserSession] = getUserSession(request)
       val myRequest = new MyRequest[A](userSession, request)
       block(myRequest)
         .map(result => result.as("application/json"))
