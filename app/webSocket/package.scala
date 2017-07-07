@@ -13,4 +13,5 @@ package object webSocket {
   case class RemoveFromWaitList(userId: String) extends WLCommand
   case class CountWaitList() extends WLCommand
   case class GetUserStatus(userId: String) extends WLCommand
+  case class DoMatching() extends WLCommand
 }

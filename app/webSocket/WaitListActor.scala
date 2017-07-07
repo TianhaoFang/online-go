@@ -4,15 +4,17 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.fang.game.rules.Rules
+import webSocket.WaitListActor.MatchingResult
 
 import scala.collection.immutable.HashMap
+import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class WaitListActor extends Actor {
 
-  import scala.collection.mutable.{HashMap => MutMap, HashSet => MutSet}
+  import scala.collection.mutable.{HashMap => MutMap, LinkedHashSet => MutSet}
 
   val userMap: MutMap[String, String] = MutMap()
   val waitListMap: HashMap[String, MutSet[String]] =
@@ -49,6 +51,18 @@ class WaitListActor extends Actor {
         case GetUserStatus(userId) =>
           val result: Option[String] = userMap.get(userId)
           sender() ! result
+        case DoMatching() =>
+          var result = Seq[MatchingResult]()
+          // find the pair in the game
+          for((key, value) <- waitListMap){
+            WaitListActor.removeTwoValues(value) match {
+              case None =>
+              case Some((v1, v2)) =>
+                userMap -= v1 -= v2
+                result = MatchingResult(key, v1, v2) +: result
+            }
+          }
+          sender() ! result
       }
     case other => sender ! new Exception("unknown command type: " + other)
   }
@@ -56,6 +70,8 @@ class WaitListActor extends Actor {
 
 object WaitListActor {
   implicit val timeout: Timeout = Timeout(2, HOURS)
+
+  case class MatchingResult(rule: String, user1: String, user2: String)
 
   def wrap(actorRef: ActorRef)(implicit context: ExecutionContext) =
     new Wrapper(actorRef)(context)
@@ -84,6 +100,18 @@ object WaitListActor {
 
     def getUserStatus(userId: String): Future[Option[String]] =
       (actorRef ? GetUserStatus(userId)).mapTo[Option[String]]
+
+    def doMatching(): Future[Seq[MatchingResult]] =
+      (actorRef ? DoMatching()).mapTo[Seq[MatchingResult]]
   }
 
+  def removeTwoValues[T](set: mutable.Set[T]): Option[(T, T)] = {
+    val iterator = set.iterator
+    if(!iterator.hasNext) return None
+    val v1 = iterator.next()
+    if(!iterator.hasNext) return None
+    val v2 = iterator.next()
+    set -= v1 -= v2
+    Some((v1, v2))
+  }
 }

@@ -13,6 +13,7 @@ class GlobalActors @Inject()(val system: ActorSystem, private implicit val conte
   val gameBoarder: KeyBroadCastActor.Wrapper = KeyBroadCastActor.create(system, "gameBoarder")
   val userStatusBoarder: KeyBroadCastActor.Wrapper = KeyBroadCastActor.create(system, "userStatusBoarder")
   val waitListActor: WaitListActor.Wrapper = WaitListActor.create(system, "waitListActor")
+
   GlobalActors.instance = this
 }
 

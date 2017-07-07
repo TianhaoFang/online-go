@@ -29,25 +29,11 @@ class UserStatusController @Inject()
 
   def connectWebSocket(userId: String): WebSocket = WebSocket.acceptOrResult { requestHeader =>
     val request = new MyRequest(MyAction.getUserSession(requestHeader), Request(requestHeader, ""))
-    if (false && !request.isValidUser(userId)) {
+    if (!request.isValidUser(userId)) {
       ValidUser.genError("not authenticated").map(s => Left(s.get))
     } else {
       Future.successful(Right(Flow.fromProcessor(() =>
-        new UserStatusWebSocket(this, globalActors, userId)
-        /*new WebSocketProcessor[String, String] {
-          override def onReceive(message: String): Unit = {
-            queryStatus(userId).map(write(_)).foreach(sendMessage)
-          }
-
-          override def onConnected(): Unit = {
-            userStatusBoarder.addOutput(userId, this)
-            queryStatus(userId).map(write(_)).foreach(sendMessage)
-          }
-
-          override def onCloseClient(): Unit = {
-            userStatusBoarder.removeOutput(userId, this)
-          }
-        }*/)))
+        new UserStatusWebSocket(this, globalActors, userId))))
     }
   }
 
