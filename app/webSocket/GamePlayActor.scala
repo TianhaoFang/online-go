@@ -9,6 +9,8 @@ import webSocket.GamePlayActor._
 
 import scala.collection.mutable.{HashMap => HMap}
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.HOURS
 
 class GamePlayActor extends Actor{
   var map: HMap[UUID, GameValue] = new HMap()
@@ -55,6 +57,8 @@ object GamePlayActor {
   case class Normal(status: Status, step: Int) extends StepResult
 
   case class GameValue(var gameStatus: GameStatus, var lastTime: Long)
+
+  implicit val timeOut = akka.util.Timeout(Duration(2, HOURS))
 
   class Wrapper(val actorRef: ActorRef){
     def createGame(uuid: UUID, rule: String): Future[Boolean] =

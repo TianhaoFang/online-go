@@ -13,7 +13,7 @@ import com.fang.{ErrorMessage, GamePlayJson, UserStatus}
 import controllers.GamePlayController.makeMatchingSchedule
 import models.{GamePlayDAO, GamePlayModel}
 import play.api.mvc._
-import webSocket.{GamePlayWebSocket, GlobalActors}
+import webSocket.{GamePlayActor, GamePlayWebSocket, GlobalActors}
 import upickle.default.{read, write}
 import util.MyActions.MyAction
 import util.UParser
@@ -43,7 +43,7 @@ class GamePlayController @Inject()
     gamePlayDAO.queryGame(gameId).map{
       case None => genNotFound(gameId)
       case Some(gamePlayModel) =>
-        Ok(write[GamePlayModel](gamePlayModel))
+        Ok(write[GamePlayJson](gamePlayModel.toStrId))
     }
   }
 
@@ -95,7 +95,7 @@ class GamePlayController @Inject()
     import scala.concurrent.Future.{successful => succ}
     globalActors.gamePlayActor.putStep(UUID.fromString(gameId), body, index)
       .flatMap {
-        case NotFound(uuid) =>
+        case GamePlayActor.NotFound(uuid) =>
           succ(genNotFound(gameId))
         case Invalid(message) =>
           succ(genError(message))

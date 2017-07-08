@@ -10,36 +10,18 @@ object UserStatusAPI {
   def wsProtocol: String =
     if (window.location.protocol.startsWith("https")) "wss://" else "ws://"
 
-  def wsUrl(userId: String): String = {
-    s"$wsProtocol/user/$userId/status"
+  def wsUrl(relPath: String): String = {
+    wsProtocol + window.location.host + relPath
   }
 
-  abstract class UserStatusSocket(val userId: String) {
-    val socket = new WebSocket(wsUrl(userId))
-    socket.onerror = (event: ErrorEvent) => onError(event.message)
-    socket.onclose = onClose(_)
-    socket.onopen = onOpen(_)
-    socket.onmessage = onMessage(_)
+  private def userWsPath(userId: String): String = wsUrl(s"/user/$userId/status")
 
-    private def onMessage(event: MessageEvent) = {
-      val data: String = event.data.asInstanceOf[String]
-      try {
-        val transformed: ReceiveType = read[ReceiveType](data)
-        onReceive(transformed)
-      } catch {
-        case error: Exception => onError(error.getMessage)
-      }
+  abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, String](userWsPath(userId)){
+    override def decode(input: String): ReceiveType = {
+      read[ReceiveType](input)
     }
 
-    def close(): Unit = socket.close()
-
-    def onClose(event: CloseEvent): Unit
-
-    def onError(message: String): Unit
-
-    def onOpen(event: Event): Unit
-
-    def onReceive(data: ReceiveType): Unit
+    override def encode(output: String): String = output
   }
 
   abstract class TypedUserStatusSocket(userId: String) extends UserStatusSocket(userId) {

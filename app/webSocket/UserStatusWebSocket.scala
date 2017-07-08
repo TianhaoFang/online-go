@@ -5,11 +5,15 @@ import com.fang.{ErrorMessage, UserStatus}
 import controllers.UserStatusController
 import upickle.default.{read, write}
 
+import scala.concurrent.ExecutionContext
+
 class UserStatusWebSocket
 (
   userStatusController: UserStatusController,
   globalActors: GlobalActors,
   userId: String
+)(
+  implicit val executionContext: ExecutionContext
 ) extends WebSocketProcessor[String, String] {
 
   import globalActors._
@@ -45,17 +49,17 @@ class UserStatusWebSocket
   }
 
   override def onReceive(message: String): Unit = {
-    try{
+    try {
       read[UserStatus.USWebSocket](message) match {
         case QueryUS() =>
           userStatusController.queryStatus(userId).foreach(sendResult)
         case UpdateUS(userStatus) =>
-          userStatusController.updateStatus(userId, userStatus).foreach{
+          userStatusController.updateStatus(userId, userStatus).foreach {
             case Left(errorMessage) => sendError(errorMessage)
             case Right(newStatus) => sendResult(newStatus)
           }
       }
-    }catch {
+    } catch {
       case exception: Exception => sendError(exception.getMessage)
     }
   }
