@@ -17,4 +17,8 @@ case class GamePlayJson
 
 object GamePlayJson {
   implicit val wrapper: ReadWriter[GamePlayJson] = macroRW[GamePlayJson]
+
+  val PLAYING = "playing"
+  val END = "end"
+  val STOPPED = "stopped"
 }

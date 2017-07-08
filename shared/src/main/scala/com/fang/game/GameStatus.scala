@@ -38,7 +38,7 @@ class GameStatus(val gameRule: GameRule) extends Traversable[(Step, Int)] {
       return Left(s"this space($x, $y) is not allowed by game rule")
     Try(gameRule.placeOn(gameBoard)(x, y, step)) match {
       case Failure(exception) =>
-        error = Some(exception.asInstanceOf)
+        error = Some(exception.asInstanceOf[Exception])
         Left(exception.getMessage)
       case Success(newStatus) =>
         status = newStatus

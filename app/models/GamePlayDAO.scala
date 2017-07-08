@@ -9,13 +9,15 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
                            (implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] {
+
   import util.MyPostgresDriver.api._
 
-  class GamePlayTable(tag: Tag) extends Table[GamePlayModel](tag, "gameplay"){
+  class GamePlayTable(tag: Tag) extends Table[GamePlayModel](tag, "gameplay") {
     def id = column[UUID]("id", O.PrimaryKey)
     def first_user = column[String]("first_user")
     def second_user = column[String]("second_user")
@@ -37,4 +39,24 @@ class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
   def queryRunningGame(userId: String): Future[Option[GamePlayModel]] = db.run(
     gamePlays.filter(g => containUser(userId)(g) && g.first_win.isEmpty).result.headOption
   )
+
+  def createGame(gamePlayModel: GamePlayModel): Future[Boolean] = db.run(
+    gamePlays += gamePlayModel
+  ).map(_ > 0)
+
+  def queryGame(id: String): Future[Option[GamePlayModel]] = {
+    val uid = Try(UUID.fromString(id))
+    if(uid.isFailure) Future.successful(None)
+    else db.run(gamePlays.filter(_.id === uid.get).result.headOption)
+  }
+
+  def mapUpdateField(model: GamePlayModel): (String, Option[Boolean], List[Step]) =
+    (model.status, model.first_win, model.steps)
+
+  def updateGame(id: String, gamePlayModel: GamePlayModel): Future[Int] = {
+    val uid = Try(UUID.fromString(id))
+    if(uid.isFailure) Future.successful(0)
+    else db.run(gamePlays.filter(_.id === uid.get).map(m => (m.status, m.first_win, m.steps))
+      .update((gamePlayModel.status, gamePlayModel.first_win, gamePlayModel.steps)))
+  }
 }
