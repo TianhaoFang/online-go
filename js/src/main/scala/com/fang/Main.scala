@@ -1,34 +1,71 @@
 package com.fang
 
+import com.fang
+import com.fang.page.{InitPage, LoginPage, Page}
 import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
+import org.scalajs.dom.{HashChangeEvent, document, window}
 import org.scalajs.dom.raw.{Event, Node}
+import tinyrouter.Router
 
 import scala.scalajs.js.JSApp
+import scala.scalajs.js.annotation.JSExportTopLevel
 
-object Main extends JSApp{
-  implicit def makeIntellijHappy(x: scala.xml.Node): Binding[org.scalajs.dom.raw.Node] = ???
-  implicit def makeIntellijHappy2[T](x: T): Binding[T] = ???
+object Main extends JSApp {
+
+  import ImplicitConvert._
+  import tinyrouter.TinyRouter.{static, dynamic, UrlExtractor}
+
+  val router: Router[Page] = tinyrouter.Router[Page](
+    dynamic[LoginPage](l => s"login"){
+      case url"login" => new LoginPage
+    }
+  )
+
+  var page: Var[Page] = Var(defaultPage)
+  val feedback = new fang.page.Page.Feedback
+
+  class NotFound(val path: String) extends Page {
+    override def title(): String = "Not Found"
+
+    @dom override def onLoad(): Binding[Node] = {
+      <div>
+        Not found path for
+        {path}
+      </div>
+    }
+  }
+
+  def defaultPage: Page = { new InitPage }
 
   override def main(): Unit = {
-    println("it works")
-    println(upickle.default.write(Test.User("sdada", 8)))
-    dom.render(org.scalajs.dom.document.getElementById("app"), render)
+    document.title = page.value.title()
+    dom.render(document.getElementById("app"), render)
+    window.onhashchange = (e: HashChangeEvent) => {
+      println(s"hash change: oldUrl: ${e.oldURL}, newUrl: ${e.newURL}")
+      feedback.proceedLeave()
+      page.value.onUnload(feedback)
+      if (feedback.isCanceled) {
+        window.history.replaceState(1, page.value.title(), e.oldURL)
+        window.history.back()
+      } else {
+        val hashPath = getHash(e.newURL)
+        val newPage = router.fromUrl(hashPath).getOrElse(new NotFound(hashPath))
+        page.value = newPage
+        document.title = newPage.title()
+      }
+    }
+  }
+
+  @JSExportTopLevel("getHash")
+  def getHash(url: String): String = {
+    val index = url.indexOf('#')
+    if (index < 0) ""
+    else url.substring(index + 1)
   }
 
   @dom
   def render: Binding[Node] = {
-    val index:Var[Int] = Var(5)
-    val array:Var[Seq[Int]] = Var(Seq(1, 2, 3, 4))
-    val list = Vars("").flatMapBinding(ignore => BindingInstances.map(array)(seq => Vars(seq: _*)))
-
-    <div>
-      { for(int <- list) yield {<div>{int.toString}</div>}}
-      <button onclick={ event:Event => {
-        index.value = index.value + 1
-        array.value ++= Seq(index.value)
-      }}>{index.bind.toString}</button>
-      <div>{array.bind.toString()}</div>
-    </div>
+    page.bind.onLoad().bind
   }
 }

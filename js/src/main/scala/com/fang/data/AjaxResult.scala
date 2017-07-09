@@ -1,6 +1,7 @@
 package com.fang.data
 
 import com.fang.ErrorMessage
+import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.raw.XMLHttpRequest
 import upickle.default.read
 
@@ -19,6 +20,7 @@ object AjaxResult {
   }
 
   def mapToResult[T](mapper: String => T): XMLHttpRequest => AjaxResult[T] = { xhr =>
+    println("mapToResult is called"+  xhr.status + " " + xhr.responseText)
     val code = xhr.status
     if (code >= 200 && code <= 299) {
       Ok(mapper(xhr.responseText))
@@ -26,5 +28,11 @@ object AjaxResult {
       val errorMessage = read[ErrorMessage](xhr.responseText)
       Error(errorMessage.message, xhr.status)
     }
+  }
+
+  def recovery[U]:PartialFunction[Throwable, AjaxResult[U]] = {
+    case AjaxException(xhr) =>
+      val errorMessage = read[ErrorMessage](xhr.responseText)
+      Error[U](errorMessage.message, xhr.status)
   }
 }

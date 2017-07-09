@@ -19,6 +19,6 @@ class Filters @Inject() (
   securityHeadersFilter: SecurityHeadersFilter
 ) extends DefaultHttpFilters(
   // csrfFilter,
-  allowedHostsFilter,
-  securityHeadersFilter
+  allowedHostsFilter
+  // securityHeadersFilter
 )
