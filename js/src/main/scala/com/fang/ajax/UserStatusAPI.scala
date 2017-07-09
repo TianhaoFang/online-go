@@ -16,7 +16,7 @@ object UserStatusAPI {
 
   private def userWsPath(userId: String): String = wsUrl(s"/user/$userId/status")
 
-  abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, String](userWsPath(userId)){
+  abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, String](userWsPath(userId)) {
     override def decode(input: String): ReceiveType = {
       read[ReceiveType](input)
     }

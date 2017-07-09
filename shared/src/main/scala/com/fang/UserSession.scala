@@ -8,4 +8,7 @@ case class UserSession(id: String, role: String = "user", tag: String = UserSess
 object UserSession {
   def rand: String = Math.random().toString + ":ect"
   implicit val wrapper: ReadWriter[UserSession] = macroRW[UserSession]
+
+  val USER = "user"
+  val ADMIN = "admin"
 }
