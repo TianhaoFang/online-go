@@ -1,11 +1,18 @@
 package com.fang.page
 
 import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.raw.{Event, Node}
 import com.fang.ImplicitConvert._
+import com.fang.page.DomUtil.bindInputValue
+import com.thoughtworks.binding.Binding.Var
+import org.scalajs.dom.window
 
 class LoginPage extends Page {
   override def title(): String = "login"
+
+  val username = Var("")
+  val password = Var("")
+  @dom val allValid: Binding[Boolean] = username.bind.length > 0 && password.bind.length > 0
 
   @dom override def onLoad(): Binding[Node] = {
     <div class="container">
@@ -18,17 +25,27 @@ class LoginPage extends Page {
       <form name="loginForm" noValidate={true}>
         <div class="form-group">
           <label class="control-label">Username</label>
-          <input type="text" name="username" class="form-control" placeholder="Your name"/>
+          <input type="text" name="username" class="form-control"
+                 placeholder="Your name" oninput={bindInputValue(_: Event, username)}/>
         </div>
         <div class="form-group">
           <label class="control-label">Password</label>
-          <input type="password" name="password" class="form-control" placeholder="Password"/>
+          <input type="password" name="password" class="form-control"
+                 placeholder="Password" oninput={bindInputValue(_: Event, password)}/>
         </div>
       </form>
       <div class="padding20"></div>
-      <button class="btn btn-default btn-block">Ok</button>
+      <div></div>
+      <button class="btn btn-default btn-block"
+              disabled={!allValid.bind}
+              onclick={_:Event => onLogin()}>Ok</button>
       <button class="btn btn-danger btn-block">Login With Google</button>
+      <a href="#register" class="btn btn-primary btn-block">Register</a>
       <button class="btn btn-info btn-block">Watch Others Play</button>
     </div>
+  }
+
+  def onLogin(): Unit = {
+    window.alert(s"username: ${username.value}, password: ${password.value}")
   }
 }

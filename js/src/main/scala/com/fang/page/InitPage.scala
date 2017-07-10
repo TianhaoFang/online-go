@@ -22,7 +22,12 @@ class InitPage extends Page{
         }
       case Error(message, code) =>
         println("an invalid login is found")
-        window.location.hash = "#login"
+        if(window.location.hash != "#login"){
+          window.location.hash = "#login"
+        }else{
+          Main.page.value = new LoginPage
+          document.title = Main.page.value.title()
+        }
     }
     <h1 class="text-center">Loading</h1>
   }

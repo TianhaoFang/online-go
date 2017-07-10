@@ -1,7 +1,7 @@
 package com.fang
 
 import com.fang
-import com.fang.page.{InitPage, LoginPage, Page}
+import com.fang.page.{InitPage, LoginPage, Page, RegisterPage}
 import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.{HashChangeEvent, document, window}
@@ -17,8 +17,11 @@ object Main extends JSApp {
   import tinyrouter.TinyRouter.{static, dynamic, UrlExtractor}
 
   val router: Router[Page] = tinyrouter.Router[Page](
-    dynamic[LoginPage](l => s"login"){
+    dynamic[LoginPage](_ => s"login"){
       case url"login" => new LoginPage
+    },
+    dynamic[RegisterPage](_ => "register"){
+      case url"register" => new RegisterPage
     }
   )
 
