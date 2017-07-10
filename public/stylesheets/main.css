@@ -43,3 +43,8 @@
 .padding10 {
     padding-top: 10px;
 }
+
+.thumbImage {
+    width: 75px;
+    height: 75px;
+}

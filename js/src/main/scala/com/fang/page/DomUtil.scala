@@ -1,7 +1,7 @@
 package com.fang.page
 
 import com.fang.ImplicitConvert._
-import com.thoughtworks.binding.Binding.Var
+import com.thoughtworks.binding.Binding.{Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Event, HTMLInputElement}
 
@@ -14,6 +14,11 @@ object DomUtil {
   def bindInputValue[T](e: Event, binding: Var[T], mapper: String => T): Unit = {
     val text: String = e.target.asInstanceOf[HTMLInputElement].value.trim()
     binding.value = mapper(text)
+  }
+
+  def bindCheckbox(e: Event, binding: Var[Boolean]): Unit = {
+    val bool: Boolean = e.target.asInstanceOf[HTMLInputElement].checked
+    binding.value = bool
   }
 
   import java.util.regex.Pattern
@@ -36,5 +41,21 @@ object DomUtil {
   def hideClassIf(prev: String, toHide: String, hide: Binding[Boolean]): Binding[String] = {
     @dom val show: Binding[Boolean] = !hide.bind
     showClassIf(prev, toHide, show)
+  }
+
+  def assignVars[T](vars: Vars[T], seq: Seq[T]): Unit = {
+    val pairs: Seq[(T, Int)] = seq.zipWithIndex
+    val proxy = vars.value
+    pairs.foreach{
+      case (t, index) =>
+        if(index < proxy.length){
+          proxy.update(index, t)
+        }else{
+          proxy.append(t)
+        }
+    }
+    for(i <- Range(pairs.length, proxy.length).reverse){
+      proxy.remove(i)
+    }
   }
 }

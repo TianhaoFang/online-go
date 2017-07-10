@@ -50,7 +50,6 @@ object Main extends JSApp {
       page.value.onUnload(feedback)
       if (feedback.isCanceled) {
         window.history.replaceState(1, page.value.title(), e.oldURL)
-        window.history.back()
       } else {
         val hashPath = getHash(e.newURL)
         val newPage = router.fromUrl(hashPath).getOrElse(new NotFound(hashPath))

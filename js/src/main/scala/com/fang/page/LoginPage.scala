@@ -3,7 +3,9 @@ package com.fang.page
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Event, Node}
 import com.fang.ImplicitConvert._
-import com.fang.page.DomUtil.bindInputValue
+import com.fang.ajax.UserAPI
+import com.fang.data.AjaxResult.{Error, Ok}
+import com.fang.page.DomUtil.{bindInputValue, hideClassIf}
 import com.thoughtworks.binding.Binding.Var
 import org.scalajs.dom.window
 
@@ -13,6 +15,7 @@ class LoginPage extends Page {
   val username = Var("")
   val password = Var("")
   @dom val allValid: Binding[Boolean] = username.bind.length > 0 && password.bind.length > 0
+  val errorMessage:Var[Option[String]] = Var(None)
 
   @dom override def onLoad(): Binding[Node] = {
     <div class="container">
@@ -33,6 +36,12 @@ class LoginPage extends Page {
           <input type="password" name="password" class="form-control"
                  placeholder="Password" oninput={bindInputValue(_: Event, password)}/>
         </div>
+        <div class={
+             @dom val show:Binding[Boolean] = errorMessage.bind.isDefined
+             hideClassIf("alert alert-danger", "hide", show).bind
+             }>
+          {errorMessage.bind.getOrElse("")}
+        </div>
       </form>
       <div class="padding20"></div>
       <div></div>
@@ -46,6 +55,11 @@ class LoginPage extends Page {
   }
 
   def onLogin(): Unit = {
-    window.alert(s"username: ${username.value}, password: ${password.value}")
+    UserAPI.userLogin(username.value, password.value).foreach {
+      case Ok(value) =>
+        window.alert(value.toString)
+      case Error(message, _) =>
+        errorMessage.value = Some(message)
+    }
   }
 }
