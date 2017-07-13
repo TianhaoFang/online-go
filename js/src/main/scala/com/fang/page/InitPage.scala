@@ -6,12 +6,14 @@ import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{document, window}
 import com.fang.ImplicitConvert._
+import com.fang.data.GlobalValue
 
 class InitPage extends Page{
   override def title(): String = "will changed"
 
   @dom override def onLoad(): Binding[Node] = {
     val url = Main.getHash(window.location.href)
+    GlobalValue.updateUserSession()
     UserAPI.logStatus().map {
       case Ok(value) =>
         println(value.toString)

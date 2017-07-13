@@ -20,7 +20,9 @@ object UserStatusNavBar {
         else if(status.isWaiting) Seq(NavItem("Waiting On" + status.waitingOn.get))
         else if(status.isPlaying) Seq(NavItem("Return to Game"))
         else Seq()) ++ Seq(
-          NavItem("Profile"), NavItem("Friends"), NavItem("logout")
+          NavItem("Profile", "#user/" + status.userId),
+          NavItem("Friends"),
+          NavItem("logout", "#logout")
         )
       case None =>
         Seq(

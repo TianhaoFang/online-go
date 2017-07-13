@@ -18,7 +18,7 @@ object GlobalValue {
   val userEventListener: EventListener[ReceiveType] = new EventListener[ReceiveType]()
   val isAdmin: Var[Boolean] = Var(false)
 
-  window.setInterval(() => updateUserSession(), 3000)
+  window.setInterval(() => updateUserSession(), 30000)
   userEventListener.addListener {
     case Left(a) =>
       errorMessage.value = Some(a)
@@ -67,14 +67,19 @@ object GlobalValue {
           }
         }else if(value.role == UserSession.ADMIN){
           isAdmin.value = true
-          userStatus.value = None
-          errorMessage.value = None
-          if(userStatusSession.isDefined){
-            userStatusSession.get.close()
-          }
+          closeConnection()
         }
       case Error(_, _) =>
+        closeConnection()
         userSession.value = None
+    }
+  }
+
+  def closeConnection(): Unit = {
+    userStatus.value = None
+    errorMessage.value = None
+    if(userStatusSession.isDefined){
+      userStatusSession.get.close()
     }
   }
 }

@@ -25,6 +25,9 @@ object Main extends JSApp {
     },
     dynamic[ProfilePage](p => s"user/${p.userId}"){
       case url"user/$userId" => new ProfilePage(userId)
+    },
+    dynamic[LogoutPage](_ => "logout"){
+      case url"logout" => new LogoutPage()
     }
   )
 
