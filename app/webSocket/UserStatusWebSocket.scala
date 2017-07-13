@@ -38,7 +38,9 @@ class UserStatusWebSocket
         webSocket.closeClient()
       }
     })
-    userStatusController.queryStatus(userId).map(write(_)).foreach(sendMessage)
+    userStatusController.queryStatus(userId).foreach{ status =>
+      sendResult(status)
+    }
   }
 
   override def onCloseClient(): Unit = {

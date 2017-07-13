@@ -1,8 +1,9 @@
 package com.fang.ajax
 
+import com.fang.UserStatus.USWebSocket
 import com.fang.{ErrorMessage, UserStatus}
 import org.scalajs.dom._
-import upickle.default.read
+import upickle.default.{read, write}
 
 object UserStatusAPI {
   type ReceiveType = Either[ErrorMessage, UserStatus]
@@ -16,12 +17,12 @@ object UserStatusAPI {
 
   private def userWsPath(userId: String): String = wsUrl(s"/user/$userId/status")
 
-  abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, String](userWsPath(userId)) {
+  abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, USWebSocket](userWsPath(userId)) {
     override def decode(input: String): ReceiveType = {
       read[ReceiveType](input)
     }
 
-    override def encode(output: String): String = output
+    override def encode(output: USWebSocket): String = write[USWebSocket](output)
   }
 
   abstract class TypedUserStatusSocket(userId: String) extends UserStatusSocket(userId) {

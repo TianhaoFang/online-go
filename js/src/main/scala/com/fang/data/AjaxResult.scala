@@ -20,7 +20,6 @@ object AjaxResult {
   }
 
   def mapToResult[T](mapper: String => T): XMLHttpRequest => AjaxResult[T] = { xhr =>
-    println("mapToResult is called"+  xhr.status + " " + xhr.responseText)
     val code = xhr.status
     if (code >= 200 && code <= 299) {
       Ok(mapper(xhr.responseText))

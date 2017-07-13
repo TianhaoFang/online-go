@@ -6,6 +6,7 @@ import com.fang.ImplicitConvert._
 import com.fang.UserSession
 import com.fang.ajax.UserAPI
 import com.fang.data.AjaxResult.{Error, Ok}
+import com.fang.data.GlobalValue
 import com.fang.page.DomUtil.{bindInputValue, hideClassIf}
 import com.thoughtworks.binding.Binding.Var
 import org.scalajs.dom.window
@@ -56,6 +57,7 @@ class LoginPage extends Page {
     UserAPI.userLogin(username.value, password.value).foreach {
       case Ok(value) =>
         // window.alert(value.toString)
+        GlobalValue.updateUserSession()
         if(value.role == UserSession.USER){
           window.location.hash = "user/" + value.id
         }

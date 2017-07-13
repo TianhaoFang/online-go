@@ -5,7 +5,7 @@ import com.fang.{Password, UserModel}
 import com.fang.ajax.UserAPI
 import com.fang.data.AjaxResult.{AjaxResult, Error, Ok}
 import com.fang.page.DomUtil.{bindCheckbox, bindInputValue, hideClassIf, showClassIf}
-import com.fang.segment.HeadNavBar
+import com.fang.segment.{HeadNavBar, UserStatusNavBar}
 import com.fang.segment.HeadNavBar.NavItem
 import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
@@ -45,10 +45,7 @@ class RegisterPage extends Page {
 
   @dom override def onLoad(): Binding[Node] = {
     <div>
-      {HeadNavBar(Vars(
-      NavItem("Watch Others"),
-      NavItem("Login", "#login")
-    )).bind}
+      {UserStatusNavBar().bind}
 
       <div class="container with-padding">
         <h1><b>Register</b></h1>
