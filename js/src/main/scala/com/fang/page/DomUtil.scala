@@ -30,17 +30,16 @@ object DomUtil {
     ptr.matcher(text).matches()
   }
 
-  @dom def showClassIf(prev: String, toShow: String, show: Binding[Boolean]): Binding[String] = {
-    if(show.bind){
+  def showClassIf(prev: String, toShow: String, show: Boolean): String = {
+    if(show){
       prev + " " + toShow
     }else{
       prev
     }
   }
 
-  def hideClassIf(prev: String, toHide: String, hide: Binding[Boolean]): Binding[String] = {
-    @dom val show: Binding[Boolean] = !hide.bind
-    showClassIf(prev, toHide, show)
+  def hideClassIf(prev: String, toHide: String, hide: Boolean): String = {
+    showClassIf(prev, toHide, !hide)
   }
 
   def assignVars[T](vars: Vars[T], seq: Seq[T]): Unit = {

@@ -36,10 +36,7 @@ class LoginPage extends Page {
           <input type="password" name="password" class="form-control"
                  placeholder="Password" oninput={bindInputValue(_: Event, password)}/>
         </div>
-        <div class={
-             @dom val show:Binding[Boolean] = errorMessage.bind.isDefined
-             hideClassIf("alert alert-danger", "hide", show).bind
-             }>
+        <div class={hideClassIf("alert alert-danger", "hide", errorMessage.bind.isDefined)}>
           {errorMessage.bind.getOrElse("")}
         </div>
       </form>
