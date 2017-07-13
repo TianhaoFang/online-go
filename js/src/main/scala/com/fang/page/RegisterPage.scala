@@ -1,7 +1,9 @@
 package com.fang.page
 
 import com.fang.ImplicitConvert._
+import com.fang.{Password, UserModel}
 import com.fang.ajax.UserAPI
+import com.fang.data.AjaxResult.{AjaxResult, Error, Ok}
 import com.fang.page.DomUtil.{bindCheckbox, bindInputValue, hideClassIf, showClassIf}
 import com.fang.segment.HeadNavBar
 import com.fang.segment.HeadNavBar.NavItem
@@ -10,26 +12,27 @@ import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Event, HTMLImageElement, Node}
 import org.scalajs.dom.window
 
+import scala.concurrent.Future
+
 class RegisterPage extends Page {
-  def isRegister: Boolean = false
+  def isRegister: Boolean = true
   val isViewOnly: Var[Boolean] = Var(true)
 
   override def title(): String = "register"
 
-  val username: Var[String] = Var("abcd")
+  val username: Var[String] = Var("")
   var password: Var[String] = Var("")
   val password2: Var[String] = Var("")
-  val email: Var[String] = Var("c@c.com")
+  val email: Var[String] = Var("")
   val nickname: Var[String] = Var("")
   val customImageUrl: Var[String] = Var("")
   val oldPassword: Var[String] = Var("")
+  val defaultUrl: Var[Boolean] = Var(true)
 
   @dom val userValid: Binding[Boolean] =  username.bind.length > 0
   @dom val samePassword: Binding[Boolean] = password.bind == password2.bind && password.bind.length > 0
   val emailValid: Binding[Boolean] = DomUtil.validEmail(email)
   @dom val allValid: Binding[Boolean] = (samePassword.bind || !isRegister) && emailValid.bind
-
-  val defaultUrl: Var[Boolean] = Var(true)
 
   @dom val imageUrl: Binding[String] = {
     if(defaultUrl.bind) UserAPI.defaultImageUrl(username.bind)
@@ -67,7 +70,7 @@ class RegisterPage extends Page {
             username required
           </p>
           <p class={hideClassIf("text-danger", "hide", invalidUser.bind.isDefined)}>
-            {invalidUser.value.getOrElse("")}
+            {invalidUser.bind.getOrElse("")}
           </p>
           <div class={showClassIf("form-group", "hide", !isRegister)}>
             <label class="control-label" for="id-password">Password</label>
@@ -110,7 +113,7 @@ class RegisterPage extends Page {
                 <input type="text" class="form-control" id="id-nickname" placeholder={username.bind}
                        oninput={bindInputValue(_:Event, nickname)} value={nickname.bind} />
             }else{
-              <p class="form-control-static form-control">{nickname.bind}</p>
+              <p class="form-control-static form-control">{ if(nickname.bind == "") username.bind else nickname.bind}</p>
             }}
 
           </div>
@@ -128,7 +131,7 @@ class RegisterPage extends Page {
           </div>
           <div class="checkbox">
             <label><input type="checkbox" checked={defaultUrl.bind} onclick={bindCheckbox(_:Event, defaultUrl)}/>Use default</label>
-            <button type="button" class="btn btn-sm btn-default"
+            <button type="button" class={showClassIf("btn btn-sm btn-default", "hide", !isRegister && isViewOnly.bind)}
                     data:data-toggle="modal" data:data-target="#myModal">Use Flickr for image</button>
           </div>
           <img src={imageUrl.bind} class="img-thumbnail thumbImage" />
@@ -241,19 +244,106 @@ class RegisterPage extends Page {
     window.alert(s"onRegister is called with\n" +
       s"username:${username.value} password:${password.value} password2:${password2.value}\n" +
       s"nickname: ${nickname.value} email: ${email.value} image_url:" + imageUrl.bind)
+    val model = UserModel(
+      username = username.value,
+      password = password.value,
+      nickname = nickname.value,
+      email = email.value,
+      google_id = None,
+      image_url = Some(imageUrl.bind)
+    )
+    UserAPI.createUser(model).map{
+      case Ok(value) =>
+        invalidUser.value = None
+        window.alert(value)
+        window.location.hash = "user/" + model.username
+      case Error(message, _) =>
+        window.alert(message)
+        invalidUser.value = Some(message)
+    }
+  }
+
+  def forceUpdate(bind: Var[String]): Unit = {
+    val t = bind.value
+    bind.value = ""
+    bind.value = t
   }
 
   def onModify(): Unit = {
     isViewOnly.value = false
+    forceUpdate(email)
+    forceUpdate(nickname)
+    forceUpdate(customImageUrl)
+    defaultUrl.value = !defaultUrl.value
+    defaultUrl.value = !defaultUrl.value
   }
 
   @dom def onUpdate(): Unit = {
-    window.alert(s"onUpdate is called with\n" +
-      s"username:${username.value} password:${password.value} password2:${password2.value}\n" +
-      s"nickname: ${nickname.value} email: ${email.value} image_url:" + imageUrl.bind)
+//    window.alert(s"onUpdate is called with\n" +
+//      s"username:${username.value} password:${password.value} password2:${password2.value}\n" +
+//      s"nickname: ${nickname.value} email: ${email.value} image_url:" + imageUrl.bind)
+    UserAPI.updateUser(UserModel.NoPassword(
+      username = username.value,
+      nickname = nickname.value,
+      email = email.value,
+      google_id = None,
+      image_url = Some(imageUrl.bind)
+    )).map {
+      case Ok(value) =>
+        window.alert("update success")
+        initFieldWithModel(value)
+      case Error(message, _) =>
+        initWithId(username.value)
+        window.alert(message)
+    }
   }
 
   def changePassword(): Unit = {
-    window.alert(s"changePassword old:${oldPassword.value} new:${password.value} confirm:${password2.value}")
+    // window.alert(s"changePassword old:${oldPassword.value} new:${password.value} confirm:${password2.value}")
+    UserAPI.updatePassword(username.value, Password(password.value, oldPassword.value)).foreach {
+      case Ok(value) =>
+        window.alert(value)
+      case Error(message, _) =>
+        window.alert(message)
+    }
+  }
+
+  def initFieldWithModel(model: UserModel.NoPassword): Unit = {
+    username.value = model.username
+    password.value = ""
+    password2.value = ""
+    email.value = model.email
+    nickname.value = model.nickname
+    oldPassword.value = ""
+    val url = model.image_url.getOrElse("")
+    if(url == UserAPI.defaultImageUrl(model.username)){
+      defaultUrl.value = true
+      customImageUrl.value = ""
+    }else{
+      defaultUrl.value = false
+      customImageUrl.value = url
+    }
+    isViewOnly.value = true
+  }
+
+  def fetchUserData(username: String): Future[AjaxResult[UserModel.NoPassword]] = {
+    UserAPI.getUser(username).map(_ map {
+      case Left(a) =>
+        window.alert("you are not current login, please login")
+        window.location.hash = "login"
+        UserModel.NoPassword(a.username, a.nickname, "", None, Some(""))
+      case Right(b) =>
+        b
+    })
+  }
+
+  def initWithId(username: String): Unit = {
+    fetchUserData(username).foreach {
+      case Ok(value) =>
+        initFieldWithModel(value)
+      case Error(msg, _) =>
+        window.alert(msg)
+        window.location.hash = "login"
+    }
   }
 }

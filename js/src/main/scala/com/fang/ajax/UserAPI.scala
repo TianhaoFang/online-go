@@ -2,18 +2,21 @@ package com.fang.ajax
 
 import com.fang._
 import com.fang.data.AjaxResult
-import com.fang.data.AjaxResult.AjaxResult
+import com.fang.data.AjaxResult.{AjaxResult, Error, Ok}
 import org.scalajs.dom.ext.Ajax
-import upickle.default.{read, write}
+import upickle.Js
+import upickle.Js.Obj
+import upickle.default.{read, readJs, write}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExportTopLevel
 
 object UserAPI {
-  def getUser(id: String): Future[AjaxResult[Map[String, String]]] =
+  def getUser(id: String): Future[AjaxResult[Either[UserModel.View, UserModel.NoPassword]]] =
     Ajax.get(s"/user/$id")
-      .map(AjaxResult.mapToResult(read[Map[String, String]]))
+      .map(xhr => upickle.json.read(xhr.responseText))
+      .map(mapToRightUserModel)
       .recover(AjaxResult.recovery)
 
   def createUser(userModel: UserModel): Future[AjaxResult[String]] =
@@ -64,7 +67,7 @@ object UserAPI {
   }
 
   def flickerSearchImages(query: String): Future[Seq[String]] = {
-    Ajax.get(flickrRequest(query)).map{ xhr =>
+    Ajax.get(flickrRequest(query)).map { xhr =>
       var text = xhr.responseText.replace("jsonFlickrApi(", "")
       text = text.substring(0, text.length - 1)
       val photoResult = read[PhotoResult](text)
@@ -77,9 +80,23 @@ object UserAPI {
     flickerSearchImages(query).foreach(println(_))
   }
 
-  case class PhotoItem(farm: Int, server: String, id: String, secret: String){
+  def mapToRightUserModel(jsValue: Js.Value): AjaxResult[Either[UserModel.View, UserModel.NoPassword]] = jsValue match {
+    case json: Js.Obj =>
+      if (json.value.exists { case (k, _) => k == "email" }) {
+        Ok(Right(readJs[UserModel.NoPassword](json)))
+      } else {
+        Ok(Left(readJs[UserModel.View](json)))
+      }
+    case _ =>
+      Error("unknown type", 400)
+  }
+
+  case class PhotoItem(farm: Int, server: String, id: String, secret: String) {
     def getUrl = s"https://farm$farm.staticflickr.com/$server/${id}_${secret}_s.jpg"
   }
+
   case class PhotoMiddle(photo: Seq[PhotoItem])
+
   case class PhotoResult(photos: PhotoMiddle)
+
 }

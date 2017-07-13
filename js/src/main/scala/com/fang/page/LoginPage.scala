@@ -3,6 +3,7 @@ package com.fang.page
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Event, Node}
 import com.fang.ImplicitConvert._
+import com.fang.UserSession
 import com.fang.ajax.UserAPI
 import com.fang.data.AjaxResult.{Error, Ok}
 import com.fang.page.DomUtil.{bindInputValue, hideClassIf}
@@ -54,7 +55,10 @@ class LoginPage extends Page {
   def onLogin(): Unit = {
     UserAPI.userLogin(username.value, password.value).foreach {
       case Ok(value) =>
-        window.alert(value.toString)
+        // window.alert(value.toString)
+        if(value.role == UserSession.USER){
+          window.location.hash = "user/" + value.id
+        }
       case Error(message, _) =>
         errorMessage.value = Some(message)
     }

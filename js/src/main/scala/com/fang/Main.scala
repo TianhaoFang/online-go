@@ -1,7 +1,7 @@
 package com.fang
 
 import com.fang
-import com.fang.page.{InitPage, LoginPage, Page, RegisterPage}
+import com.fang.page._
 import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.{HashChangeEvent, document, window}
@@ -22,6 +22,9 @@ object Main extends JSApp {
     },
     dynamic[RegisterPage](_ => "register"){
       case url"register" => new RegisterPage
+    },
+    dynamic[ProfilePage](p => s"user/${p.userId}"){
+      case url"user/$userId" => new ProfilePage(userId)
     }
   )
 

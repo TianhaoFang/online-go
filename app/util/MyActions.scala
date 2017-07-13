@@ -14,7 +14,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 object MyActions {
   val jwtAlgorithm = JwtAlgorithm.HS256
   val secretKey = "secretKey"
-  var expireInSecond = 10L
+  var expireInSecond = 300L
   val cookieName = "jwt"
 
   def decode(token: String): Option[UserSession] =
