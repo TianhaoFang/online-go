@@ -48,7 +48,7 @@ class RegisterPage extends Page {
       {UserStatusNavBar().bind}
 
       <div class="container with-padding">
-        <h1><b>Register</b></h1>
+        <h1><b>{ if(isRegister) "Register" else "Profile" }</b></h1>
         <div class="padding10"></div>
         <form name="registerForm">
           <div class="form-group">

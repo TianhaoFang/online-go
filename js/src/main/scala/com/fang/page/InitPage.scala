@@ -31,6 +31,9 @@ class InitPage extends Page{
           document.title = Main.page.value.title()
         }
     }
-    <h1 class="text-center">Loading</h1>
+    <div>
+      <h1 class="text-center">Loading</h1>
+      <a href="#login" class="btn btn-default btn-block">Login</a>
+    </div>
   }
 }

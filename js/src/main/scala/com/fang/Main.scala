@@ -2,10 +2,10 @@ package com.fang
 
 import com.fang
 import com.fang.page._
-import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
+import com.thoughtworks.binding.Binding.Var
 import com.thoughtworks.binding.{Binding, dom}
+import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{HashChangeEvent, document, window}
-import org.scalajs.dom.raw.{Event, Node}
 import tinyrouter.Router
 
 import scala.scalajs.js.JSApp
@@ -14,7 +14,7 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 object Main extends JSApp {
 
   import ImplicitConvert._
-  import tinyrouter.TinyRouter.{static, dynamic, UrlExtractor}
+  import tinyrouter.TinyRouter.{UrlExtractor, dynamic}
 
   val router: Router[Page] = tinyrouter.Router[Page](
     dynamic[LoginPage](_ => s"login"){
@@ -28,6 +28,9 @@ object Main extends JSApp {
     },
     dynamic[LogoutPage](_ => "logout"){
       case url"logout" => new LogoutPage()
+    },
+    dynamic[UserStatusPage](s => s"user/${s.userId}/status"){
+      case url"user/$userId/status" => new UserStatusPage(userId)
     }
   )
 
@@ -39,8 +42,8 @@ object Main extends JSApp {
 
     @dom override def onLoad(): Binding[Node] = {
       <div>
-        Not found path for
-        {path}
+        <h1 class="text-center">Not found path for {path}</h1>
+        <a href="#login" class="btn btn-default btn-block">Home Page</a>
       </div>
     }
   }
@@ -48,7 +51,7 @@ object Main extends JSApp {
   def defaultPage: Page = { new InitPage }
 
   override def main(): Unit = {
-    document.title = page.value.title()
+    // document.title = page.value.title()
     dom.render(document.getElementById("app"), render)
     window.onhashchange = (e: HashChangeEvent) => {
       println(s"hash change: oldUrl: ${e.oldURL}, newUrl: ${e.newURL}")

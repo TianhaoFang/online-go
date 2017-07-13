@@ -16,9 +16,9 @@ object UserStatusNavBar {
     @dom val userStatus: Binding[Option[UserStatus]] = GlobalValue.userStatus.bind
     @dom val seq: Binding[Seq[NavItem]] = (userStatus.bind match {
       case Some(status: UserStatus) =>
-        (if(status.isIdle) Seq(NavItem("Find Game"))
-        else if(status.isWaiting) Seq(NavItem("Waiting On" + status.waitingOn.get))
-        else if(status.isPlaying) Seq(NavItem("Return to Game"))
+        (if(status.isIdle) Seq(NavItem("Find Game", s"#user/${status.userId}/status"))
+        else if(status.isWaiting) Seq(NavItem("Waiting " + status.waitingOn.get, s"#user/${status.userId}/status"))
+        else if(status.isPlaying) Seq(NavItem("Return to Game", s"#user/${status.userId}/status"))
         else Seq()) ++ Seq(
           NavItem("Profile", "#user/" + status.userId),
           NavItem("Friends"),

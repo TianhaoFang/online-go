@@ -22,6 +22,7 @@ object GlobalValue {
   userEventListener.addListener {
     case Left(a) =>
       errorMessage.value = Some(a)
+      window.alert(a.message)
     case Right(b) =>
       userStatus.value = Some(b)
   }
@@ -30,7 +31,6 @@ object GlobalValue {
     UserAPI.logStatus().foreach {
       case Ok(value) =>
         userSession.value = Some(value)
-        println("line1")
         if(value.role == UserSession.USER){
           isAdmin.value = false
           if(userStatusSession.isDefined){
