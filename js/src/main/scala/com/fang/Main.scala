@@ -1,10 +1,12 @@
 package com.fang
 
 import com.fang
+import com.fang.data.GlobalValue
 import com.fang.page._
+import com.fang.page.game.DemoGameScene
 import com.thoughtworks.binding.Binding.Var
 import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.raw.{Node, UIEvent}
 import org.scalajs.dom.{HashChangeEvent, document, window}
 import tinyrouter.Router
 
@@ -31,22 +33,17 @@ object Main extends JSApp {
     },
     dynamic[UserStatusPage](s => s"user/${s.userId}/status"){
       case url"user/$userId/status" => new UserStatusPage(userId)
+    },
+    dynamic[DemoGameScene](s => s"game/${s.gameId}"){
+      case url"game/$gameId" => new DemoGameScene(gameId)
+    },
+    dynamic[FriendPage](s => s"user/${s.userId}/friends"){
+      case url"user/$userId/friends" => new FriendPage(userId)
     }
   )
 
   var page: Var[Page] = Var(defaultPage)
   val feedback = new fang.page.Page.Feedback
-
-  class NotFound(val path: String) extends Page {
-    override def title(): String = "Not Found"
-
-    @dom override def onLoad(): Binding[Node] = {
-      <div>
-        <h1 class="text-center">Not found path for {path}</h1>
-        <a href="#login" class="btn btn-default btn-block">Home Page</a>
-      </div>
-    }
-  }
 
   def defaultPage: Page = { new InitPage }
 
@@ -66,6 +63,17 @@ object Main extends JSApp {
         document.title = newPage.title()
       }
     }
+
+    window.onresize = (_:UIEvent) => {
+      resetHW()
+    }
+
+    resetHW()
+  }
+
+  def resetHW(): Unit = {
+    GlobalValue.windowHeight.value = window.innerHeight.toInt
+    GlobalValue.windowWidth.value = window.innerWidth.toInt
   }
 
   @JSExportTopLevel("getHash")

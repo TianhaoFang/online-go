@@ -11,7 +11,7 @@ import com.fang.ImplicitConvert._
 import com.fang.page.UserStatusPage.AlreadyPlayPage
 
 class UserStatusPage(val userId: String) extends Page {
-  var oldPage: Page = new Main.NotFound("Loading")
+  var oldPage: Page = new NotFound("Loading")
 
   override def title(): String = "User Status"
 
@@ -21,8 +21,8 @@ class UserStatusPage(val userId: String) extends Page {
         if (x.isIdle) new ChooseGamePage(userId)
         else if (x.isWaiting) new WaitingPage(x.waitingOn.get, x.userId)
         else if(x.isPlaying) new AlreadyPlayPage(x.playOn.get, x.userId)
-        else new Main.NotFound("invalid user status " + x.toString)
-      case None => new Main.NotFound("not found for the user status")
+        else new NotFound("invalid user status " + x.toString)
+      case None => new NotFound("not found for the user status")
     }
     oldPage.onUnload(new Page.Feedback())
     oldPage = result

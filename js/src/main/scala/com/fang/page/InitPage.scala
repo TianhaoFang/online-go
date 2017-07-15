@@ -18,7 +18,7 @@ class InitPage extends Page{
       case Ok(value) =>
         println(value.toString)
         if(Main.getHash(window.location.href) == url && Main.page.value == this){
-          val page = Main.router.fromUrl(url).getOrElse(new Main.NotFound(url))
+          val page = Main.router.fromUrl(url).getOrElse(new NotFound(url))
           Main.page.value = page
           document.title = page.title()
         }
