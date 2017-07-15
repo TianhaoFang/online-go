@@ -19,8 +19,8 @@
 
 .full-screen {
     position: fixed;
-    top: 54px;
-    bottom: 54px;
+    top: 50px;
+    bottom: 50px;
     left: 5px;
     right: 5px;
 }
@@ -47,4 +47,7 @@
 .thumbImage {
     width: 75px;
     height: 75px;
+}
+
+.gameBoard {
 }
