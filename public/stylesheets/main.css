@@ -51,3 +51,12 @@
 
 .gameBoard {
 }
+
+.progress-black {
+    text-align: center;
+    color: black;
+}
+
+.navbar-progress {
+    margin-top: 15px;
+}

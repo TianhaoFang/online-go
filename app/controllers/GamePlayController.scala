@@ -67,7 +67,7 @@ class GamePlayController @Inject()
       case None => succ(genNotFound(gameId))
       case Some(model) =>
         val length: Int = model.steps.length
-        if(!request.isValidUser(model.first_user) || !request.isValidUser(model.second_user)){
+        if(!request.isValidUser(model.first_user) && !request.isValidUser(model.second_user)){
           succ(genError(s"only logged in two players in the game could make steps", 401))
         }else if(length != index){
           succ(genError("could only put on step for " + model.steps.length))
@@ -102,7 +102,7 @@ class GamePlayController @Inject()
         case HasError(exception) =>
           exception.printStackTrace()
           succ(genError(exception.getMessage))
-        case Normal(status, step) =>
+        case Normal(status, _) =>
           var newModel = model.copy(steps = model.steps :+ body)
           val result = succ(Ok(write[Step](body)))
           if(status == BlackWin()) newModel = newModel.copy(first_win = Some(true), status = GamePlayJson.END)

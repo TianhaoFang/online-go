@@ -11,6 +11,7 @@ object BasicBoard {
   type Ctx2D = scalajs.dom.CanvasRenderingContext2D
 
   val noop: Ctx2D => Unit = (_: Ctx2D) => {}
+  val ignoreHandle: (Int, Int) => Unit = (_, _) => {}
   val pieceR: Int = 18
   val gridSize: Int = 40
   val PI2: Double = Math.PI * 2
@@ -19,20 +20,23 @@ object BasicBoard {
 
   def coordinate(rowNum: Int): Int = pieceR + gridSize * rowNum
 
+  def findColumn(canvasX: Int): Int = {
+    (canvasX + gridSize / 2 - pieceR) / gridSize
+  }
+
   @dom def apply
   (
-    ref: Var[HTMLCanvasElement],
     gameBoard: Binding[(GameBoard, Int)],
-    afterPaint: Ctx2D => Unit = noop
+    afterPaint: Ctx2D => Unit = noop,
+    onClick: (Int, Int) => Unit = ignoreHandle
   ): Binding[Node] = {
-    val localValue = BoardCanvas(ref)
+    val localValue = BoardCanvas((x, y) => onClickHandle(x, y, onClick))
     drawBoard(localValue.bind, gameBoard.bind._1, afterPaint)
     localValue.bind
   }
 
   @dom def drawBoard(canvas: HTMLCanvasElement, gameBoard: GameBoard, afterPaint: Ctx2D => Unit): Unit = {
     val size = gameBoard.boardSize
-    println("drawBoard is called")
     val ctx = canvas.getContext("2d").asInstanceOf[Ctx2D]
     if (canvas.height != canvasWidth(size)) {
       canvas.height = canvasWidth(size)
@@ -57,12 +61,24 @@ object BasicBoard {
         else if(piece == GameBoard.WHITE) ctx.fillStyle = "white"
         if(piece != GameBoard.EMPTY){
           ctx.beginPath()
-          ctx.moveTo(coordinate(x), coordinate(y))
-          ctx.arc(coordinate(x), coordinate(y), pieceR, 0, PI2)
+          fillPieceCircle(ctx, x, y)
           ctx.stroke()
           ctx.fill()
         }
     }
     afterPaint(ctx)
+  }
+
+  def fillPieceCircle(context: Ctx2D, x: Int, y: Int): Unit = {
+    val cx = coordinate(x)
+    val cy = coordinate(y)
+    context.moveTo(cx, cy)
+    context.arc(cx, cy, pieceR, 0, PI2)
+  }
+
+  @dom def onClickHandle(canvasX: Int, canvasY: Int, handle: (Int, Int) => Unit): Unit = {
+    val x = findColumn(canvasX)
+    val y = findColumn(canvasY)
+    handle(x, y)
   }
 }

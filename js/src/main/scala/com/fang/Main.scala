@@ -3,7 +3,7 @@ package com.fang
 import com.fang
 import com.fang.data.GlobalValue
 import com.fang.page._
-import com.fang.page.game.DemoGameScene
+import com.fang.page.game.GamePlayScene
 import com.thoughtworks.binding.Binding.Var
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.{Node, UIEvent}
@@ -34,8 +34,8 @@ object Main extends JSApp {
     dynamic[UserStatusPage](s => s"user/${s.userId}/status"){
       case url"user/$userId/status" => new UserStatusPage(userId)
     },
-    dynamic[DemoGameScene](s => s"game/${s.gameId}"){
-      case url"game/$gameId" => new DemoGameScene(gameId)
+    dynamic[GamePlayScene](s => s"game/${s.gameId}"){
+      case url"game/$gameId" => new GamePlayScene(gameId)
     },
     dynamic[FriendPage](s => s"user/${s.userId}/friends"){
       case url"user/$userId/friends" => new FriendPage(userId)

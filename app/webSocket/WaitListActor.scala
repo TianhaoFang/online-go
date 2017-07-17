@@ -101,8 +101,9 @@ object WaitListActor {
     def getUserStatus(userId: String): Future[Option[String]] =
       (actorRef ? GetUserStatus(userId)).mapTo[Option[String]]
 
-    def doMatching(): Future[Seq[MatchingResult]] =
+    def doMatching(): Future[Seq[MatchingResult]] = {
       (actorRef ? DoMatching()).mapTo[Seq[MatchingResult]]
+    }
   }
 
   def removeTwoValues[T](set: mutable.Set[T]): Option[(T, T)] = {
