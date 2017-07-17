@@ -27,6 +27,11 @@ object GamePlayAPI {
       .map(AjaxResult.mapToResult(read[Step]))
       .recover(AjaxResult.recovery)
 
+  def queryPlayingGame(): Future[AjaxResult[Seq[GamePlayJson]]] =
+    Ajax.get("/playing")
+      .map(AjaxResult.mapToResult(read[Seq[GamePlayJson]]))
+      .recover(AjaxResult.recovery)
+
   def wsPath(gameId: String): String = UserStatusAPI.wsUrl(s"/gameplay/$gameId/ws")
 
   abstract class GamePlayListener(val gameId: String) extends WSConnection[(Step, Int), String](wsPath(gameId)) {

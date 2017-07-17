@@ -29,7 +29,7 @@ class GameReviewScene(val gameId: String, val gamePlay: GamePlayJson) extends Pa
     else {
       val gameStatus = GameStatus(gamePlay.rule)
       var stepCount = 0
-      var result: Seq[GameBoard] = Seq()
+      var result: Seq[GameBoard] = Seq(gameStatus.getGameBoard.copy())
       for (step <- gamePlay.steps) {
         gameStatus.put(step, stepCount)
         stepCount += 1

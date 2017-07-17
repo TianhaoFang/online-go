@@ -29,7 +29,7 @@ object UserStatusNavBar {
         Seq(
           NavItem("Login", "#login")
         )
-    }) ++ Seq(NavItem("Watch Others"))
+    }) ++ Seq(NavItem("Watch Others", "#playing"))
     val result: Binding[(Vars[NavItem], Double)] = BindingInstances.map(seq)(s => {
       DomUtil.assignVars(items, s)
       (items, Math.random())

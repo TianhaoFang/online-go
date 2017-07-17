@@ -49,7 +49,7 @@ class LoginPage extends Page {
               onclick={_:Event => onLogin()}>Ok</button>
       <button class="btn btn-danger btn-block">Login With Google</button>
       <a href="#register" class="btn btn-primary btn-block">Register</a>
-      <button class="btn btn-info btn-block">Watch Others Play</button>
+      <a class="btn btn-info btn-block" href="#playing">Watch Others Play</a>
     </div>
   }
 

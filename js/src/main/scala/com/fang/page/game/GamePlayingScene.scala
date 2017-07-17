@@ -55,20 +55,20 @@ class GamePlayingScene(gameId: String, originGamePlay: GamePlayJson, parent: Gam
       </div>
 
       <nav class="navbar navbar-default navbar-fixed-bottom">
-        <div class="container">
-          {
-          if(isPlayerWhite == isWhitePlaying.bind){
-            <div>
-              <button class="navbar-btn navbar-right btn btn-success"
-                      disabled={nextPiece.bind.isEmpty}
-                      onclick={_:Event => onSubmit()}>Submit</button>
-              <p class="navbar-text">Is now you playing</p>
-            </div>
-          }else{
+        {
+        if(isPlayerWhite == isWhitePlaying.bind){
+          <div class="container">
+            <button class="navbar-btn navbar-right btn btn-success"
+                    disabled={nextPiece.bind.isEmpty}
+                    onclick={_:Event => onSubmit()}>Submit</button>
+            <p class="navbar-text">Is now you playing</p>
+          </div>
+        }else{
+          <div class="container">
             <p class="navbar-text">{text.bind}</p>
-          }
-          }
-        </div>
+          </div>
+        }
+        }
       </nav>
     </div>
   }

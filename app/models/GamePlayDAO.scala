@@ -4,11 +4,10 @@ import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 
+import com.fang.GamePlayJson
 import com.fang.game.Step
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.dbio.Effect
 import slick.driver.JdbcProfile
-import slick.profile.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -46,7 +45,11 @@ class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     (g: GamePlayTable) => g.first_user === id || g.second_user === id
 
   def queryRunningGame(userId: String): Future[Option[GamePlayModel]] = db.run(
-    gamePlays.filter(g => containUser(userId)(g) && g.first_win.isEmpty).result.headOption
+    gamePlays.filter(g => containUser(userId)(g) && g.status === GamePlayJson.PLAYING).result.headOption
+  )
+
+  def queryPlayingGame(): Future[Seq[GamePlayModel]] = db.run(
+    gamePlays.sortBy(_.start_time.desc).take(10).result
   )
 
   def intSeq2Str(seq: List[Int]): String = {
@@ -67,19 +70,6 @@ class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   def createGame(gamePlayModel: GamePlayModel): Future[Boolean] = {
     val m = gamePlayModel
-    //    val statement = gamePlays += gamePlayModel
-    //    statement.getDumpInfo
-    //    db.run(
-    //      statement
-    //    ).map(i => {
-    //      println(s"insert result of $gamePlayModel is $i");
-    //      i
-    //    }).map(i => i > 0)
-    //      .recover {
-    //        case exception: Exception =>
-    //          exception.printStackTrace()
-    //          false
-    //      }
     val stepStr = intSeq2Str(m.steps.map(_.toInt))
     val stat = sqlu"""INSERT INTO gameplay(id, first_user, second_user, status, rule, first_win, start_time, steps)
            VALUES (${m.id.toString}::uuid, ${m.first_user}, ${m.second_user}, ${m.status}, ${m.rule}, ${m.first_win},
@@ -97,16 +87,11 @@ class GamePlayDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     else db.run(gamePlays.filter(_.id === uid.get).result.headOption)
   }
 
-  def mapUpdateField(model: GamePlayModel): (String, Option[Boolean], List[Step]) =
-    (model.status, model.first_win, model.steps)
-
   def updateGame(id: String, gamePlayModel: GamePlayModel): Future[Int] = {
     val uid = Try(UUID.fromString(id))
     if (uid.isFailure) return Future.successful(0)
     val m = gamePlayModel
     val stepStr = intSeq2Str(m.steps.map(_.toInt))
-//    else db.run(gamePlays.filter(_.id === uid.get).map(m => (m.status, m.first_win, m.steps))
-//      .update((gamePlayModel.status, gamePlayModel.first_win, gamePlayModel.steps)))
     val statement =
       sqlu"""UPDATE gameplay SET status = ${m.status}, first_win = ${m.first_win},
             steps = ${stepStr}::integer[] WHERE id = ${id}::uuid

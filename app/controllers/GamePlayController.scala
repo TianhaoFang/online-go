@@ -83,6 +83,12 @@ class GamePlayController @Inject()
     }
   }
 
+  def queryPlayingGame(): Action[AnyContent] = Action.async{ implicit request =>
+    gamePlayDAO.queryPlayingGame().map{ seq =>
+      Ok(write[Seq[GamePlayJson]](seq.map(_.toStrId)))
+    }
+  }
+
   def connectWebSocket(gameId: String): WebSocket = WebSocket.acceptOrResult{ request =>
     gamePlayDAO.queryGame(gameId).map{
       case None => Left(genNotFound(gameId))

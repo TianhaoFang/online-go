@@ -30,6 +30,7 @@ GET           /gameplay/:gameId                    controllers.GamePlayControlle
 GET           /gameplay/:gameId/step/:index        controllers.GamePlayController.getGameStep(gameId: String, index: Int)
 PUT           /gameplay/:gameId/step/:index        controllers.GamePlayController.putGameStep(gameId: String, index: Int)
 GET           /gameplay/:gameId/ws                 controllers.GamePlayController.connectWebSocket(gameId: String)
+GET           /playing                             controllers.GamePlayController.queryPlayingGame()
 
 GET           /hash/:value                         controllers.UserController.hash(value: String)
 

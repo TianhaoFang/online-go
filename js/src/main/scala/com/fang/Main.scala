@@ -39,6 +39,9 @@ object Main extends JSApp {
     },
     dynamic[FriendPage](s => s"user/${s.userId}/friends"){
       case url"user/$userId/friends" => new FriendPage(userId)
+    },
+    dynamic[PlayingGamePage](_ => "playing"){
+      case url"playing" => new PlayingGamePage
     }
   )
 
