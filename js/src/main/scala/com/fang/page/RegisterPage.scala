@@ -127,7 +127,9 @@ class RegisterPage extends Page {
 
           </div>
           <div class="checkbox">
-            <label><input type="checkbox" checked={defaultUrl.bind} onclick={bindCheckbox(_:Event, defaultUrl)}/>Use default</label>
+            <label><input type="checkbox" disabled={!isRegister && isViewOnly.bind}
+                          checked={defaultUrl.bind}
+                          onclick={bindCheckbox(_:Event, defaultUrl)}/>Use default</label>
             <button type="button" class={showClassIf("btn btn-sm btn-default", "hide", !isRegister && isViewOnly.bind)}
                     data:data-toggle="modal" data:data-target="#myModal">Use Flickr for image</button>
           </div>
@@ -147,6 +149,12 @@ class RegisterPage extends Page {
               <span class="glyphicon glyphicon-pencil"></span> Modify
             </button>
           }
+        }
+        {
+        if(isRegister) <!-- could not logout -->
+        else <a class="btn btn-warning btn-block" href="#logout">
+          <span class="glyphicon glyphicon-share">Logout</span>
+        </a>
         }
         <button class="btn btn-danger btn-block" onclick={_:Event => window.history.back()}>
           <span class="glyphicon glyphicon-log-out"></span> Back

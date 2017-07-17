@@ -29,6 +29,7 @@ object GlobalValue {
       window.alert(a.message)
     case Right(b) =>
       userStatus.value = Some(b)
+      if(b.isPlaying) window.location.hash = "game/" + b.playOn.get
   }
 
   def updateUserSession(): Unit = {

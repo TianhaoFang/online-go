@@ -9,7 +9,6 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class GlobalActors @Inject()(val system: ActorSystem, private implicit val context: ExecutionContext) {
-  val messageBoarder: KeyBroadCastActor.Wrapper = KeyBroadCastActor.create(system, "messageBoarder")
   val gameBoarder: KeyBroadCastActor.Wrapper = KeyBroadCastActor.create(system, "gameBoarder")
   val userStatusBoarder: KeyBroadCastActor.Wrapper = KeyBroadCastActor.create(system, "userStatusBoarder")
   val waitListActor: WaitListActor.Wrapper = WaitListActor.create(system, "waitListActor")

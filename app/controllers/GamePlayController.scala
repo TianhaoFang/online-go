@@ -18,6 +18,7 @@ import upickle.default.{read, write}
 import util.MyActions.MyAction
 import util.UParser
 import webSocket.GamePlayActor.{HasError, Invalid, Normal, NotFound}
+import webSocket.WaitListActor.MatchingResult
 
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,58 +40,58 @@ class GamePlayController @Inject()
   def genNotFound(gameId: String): Result = genError("not find gameplay with id:" + gameId, 404)
 
   // the definition of the web application
-  def getGamePlay(gameId: String): Action[AnyContent] = MyAction.async{ implicit request =>
-    gamePlayDAO.queryGame(gameId).map{
+  def getGamePlay(gameId: String): Action[AnyContent] = MyAction.async { implicit request =>
+    gamePlayDAO.queryGame(gameId).map {
       case None => genNotFound(gameId)
       case Some(gamePlayModel) =>
         Ok(write[GamePlayJson](gamePlayModel.toStrId))
     }
   }
 
-  def getGameStep(gameId: String, index: Int): Action[AnyContent] = MyAction.async{ implicit request =>
-    gamePlayDAO.queryGame(gameId).map{
+  def getGameStep(gameId: String, index: Int): Action[AnyContent] = MyAction.async { implicit request =>
+    gamePlayDAO.queryGame(gameId).map {
       case None => genNotFound(gameId)
       case Some(gamePlayModel) =>
         val length: Int = gamePlayModel.steps.length
-        if(index < 0) genError("invalid index less than 0:" + index, 404)
-        else if(index >= length){
+        if (index < 0) genError("invalid index less than 0:" + index, 404)
+        else if (index >= length) {
           genError(s"the step is out of boundary 0-${length - 1}, actual $index", 404)
-        }else{
+        } else {
           Ok(write[Step](gamePlayModel.steps(index)))
         }
     }
   }
 
-  def putGameStep(gameId: String, index: Int): Action[Step] = MyAction.async(UParser(read[Step])){ implicit request =>
+  def putGameStep(gameId: String, index: Int): Action[Step] = MyAction.async(UParser(read[Step])) { implicit request =>
     import scala.concurrent.Future.{successful => succ}
-    gamePlayDAO.queryGame(gameId).flatMap{
+    gamePlayDAO.queryGame(gameId).flatMap {
       case None => succ(genNotFound(gameId))
       case Some(model) =>
         val length: Int = model.steps.length
-        if(!request.isValidUser(model.first_user) && !request.isValidUser(model.second_user)){
+        if (!request.isValidUser(model.first_user) && !request.isValidUser(model.second_user)) {
           succ(genError(s"only logged in two players in the game could make steps", 401))
-        }else if(length != index){
+        } else if (length != index) {
           succ(genError("could only put on step for " + model.steps.length))
-        }else if(!request.isValidUser(model.first_user) && length % 2 == 0){
+        } else if (!request.isValidUser(model.first_user) && length % 2 == 0) {
           succ(genError("is not your turn to make a step"))
-        }else if(!request.isValidUser(model.second_user) && length % 2 == 1){
+        } else if (!request.isValidUser(model.second_user) && length % 2 == 1) {
           succ(genError("is not your turn to make a step"))
-        }else if(model.status != GamePlayJson.PLAYING){
+        } else if (model.status != GamePlayJson.PLAYING) {
           succ(genError("the game is not playing"))
-        }else{
+        } else {
           innerPutStep(gameId, index, model, request.body)
         }
     }
   }
 
-  def queryPlayingGame(): Action[AnyContent] = Action.async{ implicit request =>
-    gamePlayDAO.queryPlayingGame().map{ seq =>
+  def queryPlayingGame(): Action[AnyContent] = Action.async { implicit request =>
+    gamePlayDAO.queryPlayingGame().map { seq =>
       Ok(write[Seq[GamePlayJson]](seq.map(_.toStrId)))
     }
   }
 
-  def connectWebSocket(gameId: String): WebSocket = WebSocket.acceptOrResult{ request =>
-    gamePlayDAO.queryGame(gameId).map{
+  def connectWebSocket(gameId: String): WebSocket = WebSocket.acceptOrResult { request =>
+    gamePlayDAO.queryGame(gameId).map {
       case None => Left(genNotFound(gameId))
       case Some(_) =>
         Right(Flow.fromProcessor(() => new GamePlayWebSocket(UUID.fromString(gameId), globalActors)))
@@ -111,15 +112,15 @@ class GamePlayController @Inject()
         case Normal(status, _) =>
           var newModel = model.copy(steps = model.steps :+ body)
           val result = succ(Ok(write[Step](body)))
-          if(status == BlackWin()) newModel = newModel.copy(first_win = Some(true), status = GamePlayJson.END)
-          if(status == WriteWin()) newModel = newModel.copy(first_win = Some(false), status = GamePlayJson.END)
+          if (status == BlackWin()) newModel = newModel.copy(first_win = Some(true), status = GamePlayJson.END)
+          if (status == WriteWin()) newModel = newModel.copy(first_win = Some(false), status = GamePlayJson.END)
           gamePlayDAO.updateGame(gameId, newModel).flatMap(_ => {
             globalActors.gameBoarder.boardCast(gameId, { processor =>
               processor.sendMessage(write[(Step, Int)]((body, index)))
             })
-            if(status == SkipNext()){
+            if (status == SkipNext()) {
               innerPutStep(gameId, index + 1, newModel, Step(0, 0)).flatMap(_ => result)
-            }else{
+            } else {
               result
             }
           })
@@ -136,41 +137,46 @@ object GamePlayController {
     actorSystem.scheduler.schedule(MATCHING_DELAY, MATCHING_INTERVAL) {
       globalActors.waitListActor.doMatching().foreach { seq =>
         seq.foreach { matchingResult =>
-          val model = GamePlayModel(
-            id = UUID.randomUUID(),
-            first_user = matchingResult.user1,
-            second_user = matchingResult.user2,
-            status = GamePlayJson.PLAYING,
-            rule = matchingResult.rule,
-            first_win = None,
-            start_time = new Timestamp(System.currentTimeMillis()),
-            steps = List()
-          )
-          gamePlayDAO.createGame(model).foreach{ bool =>
-            if(bool){
-              globalActors.gamePlayActor.createGame(model.id, model.rule).foreach{ _ =>
-                globalActors.userStatusBoarder.boardCast(model.first_user, { processor =>
-                  processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
-                    Right(UserStatus.playing(model.first_user, model.id.toString))))
-                })
-                globalActors.userStatusBoarder.boardCast(model.second_user, { processor =>
-                  processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
-                    Right(UserStatus.playing(model.second_user, model.id.toString))
-                  ))
-                })
-              }
-            }else{
-              globalActors.userStatusBoarder.boardCast(model.first_user, { processor =>
-                processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
-                  Right(UserStatus.idle(model.first_user))))
-              })
-              globalActors.userStatusBoarder.boardCast(model.second_user, { processor =>
-                processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
-                  Right(UserStatus.idle(model.second_user))))
-              })
-            }
-          }
+          startNewGame(matchingResult, globalActors, gamePlayDAO)
         }
+      }
+    }
+  }
+
+  def startNewGame(matchingResult: MatchingResult, globalActors: GlobalActors, gamePlayDAO: GamePlayDAO)
+                  (implicit executionContext: ExecutionContext): Unit = {
+    val model = GamePlayModel(
+      id = UUID.randomUUID(),
+      first_user = matchingResult.user1,
+      second_user = matchingResult.user2,
+      status = GamePlayJson.PLAYING,
+      rule = matchingResult.rule,
+      first_win = None,
+      start_time = new Timestamp(System.currentTimeMillis()),
+      steps = List()
+    )
+    gamePlayDAO.createGame(model).foreach { bool =>
+      if (bool) {
+        globalActors.gamePlayActor.createGame(model.id, model.rule).foreach { _ =>
+          globalActors.userStatusBoarder.boardCast(model.first_user, { processor =>
+            processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
+              Right(UserStatus.playing(model.first_user, model.id.toString))))
+          })
+          globalActors.userStatusBoarder.boardCast(model.second_user, { processor =>
+            processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
+              Right(UserStatus.playing(model.second_user, model.id.toString))
+            ))
+          })
+        }
+      } else {
+        globalActors.userStatusBoarder.boardCast(model.first_user, { processor =>
+          processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
+            Right(UserStatus.idle(model.first_user))))
+        })
+        globalActors.userStatusBoarder.boardCast(model.second_user, { processor =>
+          processor.sendMessage(write[Either[ErrorMessage, UserStatus]](
+            Right(UserStatus.idle(model.second_user))))
+        })
       }
     }
   }
