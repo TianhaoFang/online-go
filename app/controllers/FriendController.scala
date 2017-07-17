@@ -30,11 +30,11 @@ class FriendController @Inject()(friendDAO: FriendDAO, implicit val executionCon
     }
   }
 
-  def getInvented(userId: String): Action[AnyContent] = validAction(userId).async{ implicit request =>
+  def getInvited(userId: String): Action[AnyContent] = validAction(userId).async{ implicit request =>
     friendDAO.findInvented(userId).map(seq => Ok(write(seq)))
   }
 
-  def getInventedById(userId: String, friendId: String): Action[AnyContent] = validAction(userId).async { implicit request =>
+  def getInvitedById(userId: String, friendId: String): Action[AnyContent] = validAction(userId).async { implicit request =>
     if(userId == friendId) Future.successful(BadRequest(write(ErrorMessage("the userId should not be equal to friendId"))))
     else {
       friendDAO.findInvented(userId, friendId).map{
@@ -54,7 +54,15 @@ class FriendController @Inject()(friendDAO: FriendDAO, implicit val executionCon
     }
   }
 
-  def acceptInvention(userId: String, friendId: String): Action[AnyContent] = validAction(userId).async{ implicit request =>
+  def makeInvite(userId: String, friendId: String): Action[AnyContent] = validAction(userId).async{ implicit request =>
+    if(userId == friendId) Future.successful(BadRequest(write(ErrorMessage("the userId should not be equal to friendId"))))
+    else{
+      friendDAO.createRelation(userId, friendId).map(_ > 0)
+        .map(b => Ok(write(b)))
+    }
+  }
+
+  def acceptInvitation(userId: String, friendId: String): Action[AnyContent] = validAction(userId).async{ implicit request =>
     friendDAO.findInvented(userId, friendId).map(_.filter(_.user2 == userId)).map{
       case None => NotFound(write(ErrorMessage("no such invention or you invent others")))
       case Some(friendModel) =>

@@ -27,18 +27,23 @@ object FriendAPI {
       .recover(AjaxResult.recovery)
 
   def getInvented(userId: String): Future[AjaxResult[Seq[FriendModel]]] =
-    Ajax.get(s"/user/$userId/invented")
+    Ajax.get(s"/user/$userId/invited")
       .map(AjaxResult.mapToResult(read[Seq[FriendModel]]))
       .recover(AjaxResult.recovery)
 
   def getInventedById(userId: String, friendId: String): Future[AjaxResult[FriendModel]] =
-    Ajax.get(s"/user/$userId/invented/$friendId")
+    Ajax.get(s"/user/$userId/invited/$friendId")
       .map(AjaxResult.mapToResult(read[FriendModel]))
       .recover(AjaxResult.recovery)
 
   def acceptInvention(userId: String, friendId: String): Future[AjaxResult[String]] =
-    Ajax.put(s"/user/$userId/invented/$friendId")
+    Ajax.put(s"/user/$userId/invited/$friendId")
       .map(AjaxResult.mapToResult(read[ErrorMessage]))
       .map(_.map(_.message))
       .recover(AjaxResult.recovery)
+
+  def makeInvite(userId: String, friendId: String): Future[AjaxResult[Boolean]] =
+    Ajax.post(s"/user/$userId/invited/$friendId")
+    .map(AjaxResult.mapToResult(read[Boolean]))
+    .recover(AjaxResult.recovery)
 }

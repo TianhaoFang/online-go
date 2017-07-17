@@ -80,6 +80,12 @@ object UserAPI {
     flickerSearchImages(query).foreach(println(_))
   }
 
+  def searchName(userName: String): Future[AjaxResult[Seq[String]]] = {
+    Ajax.get(s"/search/user/$userName")
+      .map(AjaxResult.mapToResult(read[Seq[String]]))
+      .recover(AjaxResult.recovery)
+  }
+
   def mapToRightUserModel(jsValue: Js.Value): AjaxResult[Either[UserModel.View, UserModel.NoPassword]] = jsValue match {
     case json: Js.Obj =>
       if (json.value.exists { case (k, _) => k == "email" }) {

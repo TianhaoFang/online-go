@@ -13,7 +13,7 @@ class FriendDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider
   extends HasDatabaseConfigProvider[JdbcProfile] {
   import util.MyPostgresDriver.api._
 
-  class FriendTable(tag: Tag) extends Table[FriendModel](tag, "Friend"){
+  class FriendTable(tag: Tag) extends Table[FriendModel](tag, "friend"){
     def user1 = column[String]("user1", O.PrimaryKey)
     def user2 = column[String]("user2", O.PrimaryKey)
     def url = column[String]("url")
@@ -42,8 +42,8 @@ class FriendDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider
   )
 
   def findInvented(user1: String, user2: String): Future[Option[FriendModel]] = db.run(
-    friends.filter(f => (f.user1 === user1 && f.user2 === user2 && f.accepted) ||
-      (f.user2 === user1 && f.user1 === user2 && f.accepted))
+    friends.filter(f => (f.user1 === user1 && f.user2 === user2 && !f.accepted) ||
+      (f.user2 === user1 && f.user1 === user2 && !f.accepted))
       .result.headOption
   )
 
@@ -56,4 +56,13 @@ class FriendDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider
     friends.filter(f => f.user1 === friendModel.user1 && f.user2 === friendModel.user2)
       .update(friendModel)
   )
+
+  def createRelation(user1: String, user2: String): Future[Int] = db.run(
+    friends.filter(f => (f.user1 === user1 && f.user2 === user2) ||
+      (f.user2 === user1 && f.user1 === user2)).result.headOption
+  ).flatMap {
+    case Some(_) => Future.successful(0)
+    case None =>
+      db.run(friends += FriendModel(user1, user2, "", accepted = false))
+  }
 }

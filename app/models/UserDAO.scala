@@ -76,4 +76,8 @@ class UserDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     admins.filter(_.username === loginRequest.username)
       .map(_.password).update(loginRequest.password)
   )
+
+  def searchUser(userName: String): Future[Seq[String]] = db.run(
+    users.filter(_.username.startsWith(userName)).map(_.username).result
+  )
 }

@@ -13,14 +13,16 @@ GET           /login                               controllers.UserController.ge
 DELETE        /login                               controllers.UserController.logout()
 POST          /admin/login                         controllers.UserController.adminLogin()
 PUT           /admin/password                      controllers.UserController.updateAdminPassword()
+GET           /search/user/:userName               controllers.UserController.searchUser(userName: String)
 
 GET           /user/:userId/friends                controllers.FriendController.getAllFriends(userId: String)
 GET           /user/:userId/friends/:fId           controllers.FriendController.getFriendById(userId, fId: String)
 DELETE        /user/:userId/friends/:fId           controllers.FriendController.deleteRelation(userId: String, fId: String)
-GET           /user/:userId/invented               controllers.FriendController.getInvented(userId: String)
-GET           /user/:userId/invented/:fId          controllers.FriendController.getInventedById(userId, fId: String)
-PUT           /user/:userId/invented/:fId          controllers.FriendController.acceptInvention(userId, fId: String)
-DELETE        /user/:userId/invented/:fId          controllers.FriendController.deleteRelation(userId: String, fId: String)
+GET           /user/:userId/invited                controllers.FriendController.getInvited(userId: String)
+GET           /user/:userId/invited/:fId           controllers.FriendController.getInvitedById(userId, fId: String)
+PUT           /user/:userId/invited/:fId           controllers.FriendController.acceptInvitation(userId, fId: String)
+POST          /user/:userId/invited/:fId           controllers.FriendController.makeInvite(userId: String, fId: String)
+DELETE        /user/:userId/invited/:fId           controllers.FriendController.deleteRelation(userId: String, fId: String)
 
 # User status is a websocket api that receive message
 GET           /user/:userId/status                 controllers.UserStatusController.connectWebSocket(userId: String)
