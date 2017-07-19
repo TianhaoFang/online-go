@@ -13,7 +13,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object MyActions {
   val jwtAlgorithm = JwtAlgorithm.HS256
-  val secretKey = "secretKey"
+  val secretKey: String = System.getenv("PRIVATE_KEY")
   var expireInSecond = 300L
   val cookieName = "jwt"
 
