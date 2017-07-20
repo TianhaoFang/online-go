@@ -95,7 +95,7 @@ class FriendPage(val userId: String) extends Page{
           <tbody>{
             for(name <- friends) yield <tr>
               <td>{name}</td>
-              <td><button class="btn btn-sm btn-default" onclick={_:Event => onMessage(name)}>Message</button></td>
+              <td><button class="btn btn-sm btn-default" onclick={_:Event => onInvite(name)}>Invite</button></td>
               <td><button class="btn btn-sm btn-danger" onclick={_:Event => onDelete(name)}>Delete</button></td>
             </tr>}
           </tbody>
@@ -175,7 +175,7 @@ class FriendPage(val userId: String) extends Page{
     }
   }
 
-  def onMessage(name: String): Unit = {
+  def onInvite(name: String): Unit = {
     window.alert("onMessage: " + name)
   }
 

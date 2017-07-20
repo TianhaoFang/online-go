@@ -14,6 +14,7 @@ object PlayReviewTable {
           <th>Player1</th>
           <th>Player2</th>
           <th>Rule</th>
+          <th>Status</th>
           <th>Winner</th>
           <th>Watch Now</th>
         </tr>
@@ -24,6 +25,7 @@ object PlayReviewTable {
           <td>{item.first_user}</td>
           <td>{item.second_user}</td>
           <td>{item.rule}</td>
+          <td>{item.status}</td>
           <td>{item.first_win match {
             case Some(true) => item.first_user
             case Some(false) => item.second_user

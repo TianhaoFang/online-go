@@ -145,4 +145,8 @@ class UserController @Inject()(userDAO: UserDAO) extends Controller {
   def searchUser(userName: String): Action[AnyContent] = Action.async{ implicit request =>
     userDAO.searchUser(userName).map(seq => Ok(write[Seq[String]](seq)))
   }
+
+  def indexPage(): Action[AnyContent] = Action{ implicit request =>
+    Redirect("index.html")
+  }
 }

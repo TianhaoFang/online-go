@@ -5,6 +5,7 @@ import com.fang.{Password, UserModel}
 import com.fang.ajax.UserAPI
 import com.fang.data.AjaxResult.{AjaxResult, Error, Ok}
 import com.fang.page.DomUtil.{bindCheckbox, bindInputValue, hideClassIf, showClassIf}
+import com.fang.page.RegisterPage.jQueryGlobal
 import com.fang.segment.{HeadNavBar, UserStatusNavBar}
 import com.fang.segment.HeadNavBar.NavItem
 import com.thoughtworks.binding.Binding.{BindingInstances, Var, Vars}
@@ -13,6 +14,8 @@ import org.scalajs.dom.raw.{Event, HTMLImageElement, Node}
 import org.scalajs.dom.window
 
 import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.annotation.{JSGlobal, JSGlobalScope}
 
 class RegisterPage extends Page {
   def isRegister: Boolean = true
@@ -308,6 +311,7 @@ class RegisterPage extends Page {
     UserAPI.updatePassword(username.value, Password(password.value, oldPassword.value)).foreach {
       case Ok(value) =>
         window.alert(value)
+        jQueryGlobal.$("#myModal2").modal("hide")
       case Error(message, _) =>
         window.alert(message)
     }
@@ -350,5 +354,19 @@ class RegisterPage extends Page {
         window.alert(msg)
         window.location.hash = "login"
     }
+  }
+}
+
+object RegisterPage {
+  // add the closing functionality by using the jQuery facade from scala
+  @js.native
+  trait ModalElement extends js.Object {
+    def modal(command: String):Unit = js.native
+  }
+
+  @js.native
+  @JSGlobalScope
+  object jQueryGlobal extends js.Object {
+    def $(selector: String): ModalElement = js.native
   }
 }

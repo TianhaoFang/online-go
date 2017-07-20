@@ -32,7 +32,7 @@ class PlayingGamePage extends Page{
     <div>
       {UserStatusNavBar().bind}
       <div class ="container with-padding">
-        <h1>Now Playing</h1>
+        <h1>Recent Games</h1>
         {PlayReviewTable(games).bind}
       </div>
     </div>
