@@ -3,7 +3,8 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
+# The user controller
+GET           /                                    controllers.UserController.indexPage()
 GET           /user/:userId                        controllers.UserController.getUser(userId: String)
 POST          /user                                controllers.UserController.createUser()
 PUT           /user/:userId                        controllers.UserController.updateUser(userId: String)
