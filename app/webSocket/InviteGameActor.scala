@@ -45,6 +45,19 @@ class InviteGameActor extends Actor {
       case QueryInvite(user) =>
         val result: Option[InviteStatus] = userMap.get(user)
         sender() ! result
+      case RemoveInvite(user) =>
+        val result: Boolean = userMap.get(user) match {
+          case None => false
+          case Some(status) =>
+            val other = if(status.user1 == user) status.user2 else status.user1
+            userMap.remove(user)
+            val otherResult = userMap.get(other)
+            if(otherResult.isDefined && otherResult.get == status){
+              userMap.remove(other)
+            }
+            true
+        }
+        sender() ! result
     }
     case other: Any => throw new Exception("not find type" + other.getClass.getName)
   }
@@ -62,6 +75,8 @@ object InviteGameActor {
 
   case class QueryInvite(user: String) extends IVCommand
 
+  case class RemoveInvite(user: String) extends IVCommand
+
   class Wrapper(actorRef: ActorRef) {
     def makeInvite(user1: String, user2: String, rule: String): Future[Either[String, Boolean]] = {
       (actorRef ? MakeInvite(user1, user2, rule)).mapTo[Either[String, Boolean]]
@@ -73,6 +88,10 @@ object InviteGameActor {
 
     def queryInvite(user: String): Future[Option[InviteStatus]] = {
       (actorRef ? QueryInvite(user)).mapTo[Option[InviteStatus]]
+    }
+
+    def removeInvite(user: String): Future[Boolean] = {
+      (actorRef ? RemoveInvite(user)).mapTo[Boolean]
     }
   }
 

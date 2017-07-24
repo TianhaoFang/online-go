@@ -1,6 +1,7 @@
 package com.fang.data
 
 import com.fang.ImplicitConvert._
+import com.fang.UserStatus.UpdateUS
 import com.fang.ajax.UserAPI
 import com.fang.ajax.UserStatusAPI.{ReceiveType, TypedUserStatusSocket}
 import com.fang.data.AjaxResult.{Error, Ok}
@@ -28,6 +29,19 @@ object GlobalValue {
       errorMessage.value = Some(a)
       window.alert(a.message)
     case Right(b) =>
+      if(b.isInvited && userStatus.value.isDefined && !userStatus.value.get.isInvited){
+        val status = userStatus.value.get
+        if(status.userId == status.inviteStatus.get.user2){
+          val other = status.inviteStatus.get.user1
+          if(userStatusSession.isDefined){
+            if(window.confirm(s"you have received an invitation from $other, accept or not?")){
+              userStatusSession.get.sendMessage(UpdateUS(UserStatus.playing(status.userId, "")))
+            }else{
+              userStatusSession.get.sendMessage(UpdateUS(UserStatus.idle(status.userId)))
+            }
+          }
+        }
+      }
       userStatus.value = Some(b)
       if(b.isPlaying) window.location.hash = "game/" + b.playOn.get
   }

@@ -107,7 +107,7 @@ class FriendPage(val userId: String) extends Page{
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data:data-dismiss="modal"><span>&times;</span></button>
-              <h4 class="modal-title">Update Password</h4>
+              <h4 class="modal-title">Find Friends</h4>
             </div>
             <div class="modal-body">
               <div class="form-inline">
@@ -117,11 +117,42 @@ class FriendPage(val userId: String) extends Page{
                   <span class="glyphicon glyphicon-search"></span>
                 </button>
               </div>
-              <div>{
+              <ul>{
                 for(s <- waitingValue) yield
-                  <button class="btn btn-info" data:data-dismiss="modal"
-                          onclick={_:Event => makeInvite(s)}>{s}</button>
-                }</div>
+                  <li>
+                    <a data:data-dismiss="modal" onclick={_:Event => makeInvite(s)}>{s}</a>
+                  </li>
+                }</ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data:data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="myModal4" data:tabindex="-1" data:role="dialog">
+        <div class="modal-dialog" data:role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data:data-dismiss="modal"><span>&times;</span></button>
+              <h4 class="modal-title">Invite To Play</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-inline">
+                <input type="text" class="form-control" id="other"
+                       oninput={bindInputValue(_:Event, searchValue)} />
+                <button class="btn btn-default" onclick={_:Event => onSearchName()}>
+                  <span class="glyphicon glyphicon-search"></span>
+                </button>
+              </div>
+              <table><tbody>{
+                for(s <- waitingValue) yield
+                  <li>
+                    <button class="btn btn-info" data:data-dismiss="modal"
+                            onclick={_:Event => makeInvite(s)}>{s}</button>
+                  </li>
+                }</tbody></table>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-danger" data:data-dismiss="modal">Close</button>

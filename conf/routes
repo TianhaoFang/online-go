@@ -26,7 +26,8 @@ POST          /user/:userId/invited/:fId           controllers.FriendController.
 DELETE        /user/:userId/invited/:fId           controllers.FriendController.deleteRelation(userId: String, fId: String)
 
 # User status is a websocket api that receive message
-GET           /user/:userId/status                 controllers.UserStatusController.connectWebSocket(userId: String)
+GET           /user/:userId/status                 controllers.UserStatusController.getState(userId: String)
+GET           /user/:userId/status-ws              controllers.UserStatusController.connectWebSocket(userId: String)
 
 # the gameplay that contains a websocket for pushing steps and others normal websocket
 GET           /gameplay/:gameId                    controllers.GamePlayController.getGamePlay(gameId: String)

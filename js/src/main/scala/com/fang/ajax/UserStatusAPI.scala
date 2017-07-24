@@ -1,9 +1,15 @@
 package com.fang.ajax
 
 import com.fang.UserStatus.USWebSocket
+import com.fang.data.AjaxResult
+import com.fang.data.AjaxResult.AjaxResult
 import com.fang.{ErrorMessage, UserStatus}
 import org.scalajs.dom._
+import org.scalajs.dom.ext.Ajax
 import upickle.default.{read, write}
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object UserStatusAPI {
   type ReceiveType = Either[ErrorMessage, UserStatus]
@@ -15,7 +21,12 @@ object UserStatusAPI {
     wsProtocol + window.location.host + relPath
   }
 
-  private def userWsPath(userId: String): String = wsUrl(s"/user/$userId/status")
+  private def userWsPath(userId: String): String = wsUrl(s"/user/$userId/status-ws")
+
+  def getStatus(userId: String): Future[AjaxResult[UserStatus]] =
+    Ajax.get(s"/user/$userId/status")
+    .map(AjaxResult.mapToResult(read[UserStatus]))
+    .recover(AjaxResult.recovery)
 
   abstract class UserStatusSocket(val userId: String) extends WSConnection[ReceiveType, USWebSocket](userWsPath(userId)) {
     override def decode(input: String): ReceiveType = {

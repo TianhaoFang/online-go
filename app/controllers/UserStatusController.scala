@@ -6,7 +6,7 @@ import akka.stream.scaladsl.Flow
 import com.fang.{ErrorMessage, UserStatus}
 import com.fang.UserStatus.{Idle, InviteStatus, Invited, Playing, Waiting}
 import com.fang.game.GameStatus
-import models.{FriendDAO, GamePlayDAO, GamePlayModel}
+import models.{FriendDAO, GamePlayDAO, GamePlayModel, UserDAO}
 import play.api.mvc._
 import util.MyActions.{MyAction, MyRequest}
 import util.{UParser, ValidUser}
@@ -23,6 +23,7 @@ class UserStatusController @Inject()
   globalActors: GlobalActors,
   gamePlayDAO: GamePlayDAO,
   friendDAO: FriendDAO,
+  userDAO: UserDAO,
   implicit val executionContext: ExecutionContext
 ) extends Controller {
 
@@ -37,6 +38,17 @@ class UserStatusController @Inject()
     } else {
       Future.successful(Right(Flow.fromProcessor(() =>
         new UserStatusWebSocket(this, globalActors, userId))))
+    }
+  }
+
+  def getState(userId: String): Action[AnyContent] = Action.async{ implicit request =>
+    userDAO.getUserByName(userId).flatMap {
+      case None =>
+        Future.successful(NotFound(errorMessage("not find user")))
+      case Some(_) =>
+        queryStatus(userId).map{ userStatus =>
+          Ok(write[UserStatus](userStatus))
+        }
     }
   }
 
@@ -74,21 +86,28 @@ class UserStatusController @Inject()
             case exception: Exception => Left(ErrorMessage(exception.getMessage))
           }
         case Invited(_, InviteStatus(user1, user2, rule)) =>
-          if(userId != user1) instant(Left(ErrorMessage("could only invite others")))
+          if(userId != user1 || user1 == user2) instant(Left(ErrorMessage("could only invite others")))
           else{
             friendDAO.findFriend(user1, user2).flatMap{
               case None => instant(Left(ErrorMessage("no such friend:" + user2)))
               case Some(_) =>
-                inviteGameActor.makeInvite(userId, user2, rule).map {
-                  case Left(error) =>
-                    Left(ErrorMessage(error))
-                  case Right(_) =>
-                    val inviteStatus = InviteStatus(user1, user2, rule)
-                    userStatusBoarder.boardCast(user2, _.sendMessage(write[Either[ErrorMessage, UserStatus]](
-                      Right(UserStatus.invited(user2, inviteStatus))
-                    )))
-                    Right(UserStatus.invited(userId, inviteStatus))
+                queryStatus(user2).flatMap {
+                  case Playing(_, gameId) => instant(Left(ErrorMessage("the other user is playing at " + gameId)))
+                  case Waiting(_, waitRule) => instant(Left(ErrorMessage("the other player is waiting for game:" + waitRule)))
+                  case Idle(_) =>
+                    inviteGameActor.makeInvite(userId, user2, rule).map {
+                      case Left(error) =>
+                        Left(ErrorMessage(error))
+                      case Right(_) =>
+                        val inviteStatus = InviteStatus(user1, user2, rule)
+                        userStatusBoarder.boardCast(user2, _.sendMessage(write[Either[ErrorMessage, UserStatus]](
+                          Right(UserStatus.invited(user2, inviteStatus))
+                        )))
+                        Right(UserStatus.invited(userId, inviteStatus))
+                    }
+                  case _ => instant(Left(ErrorMessage("the other player is not able to receive invite")))
                 }
+
             }
 
           }
@@ -119,6 +138,7 @@ class UserStatusController @Inject()
           }
         case Playing(_, _) =>
           if(user1 == userId) instant(Left(ErrorMessage("only invented people could determine weather to play game")))
+          else if(user2 != userId) instant(Left(ErrorMessage("could not accept the invitation by other identity")))
           else{
             GamePlayController.startNewGame(MatchingResult(rule, user1, user2), globalActors, gamePlayDAO)
             instant(Right(inv))

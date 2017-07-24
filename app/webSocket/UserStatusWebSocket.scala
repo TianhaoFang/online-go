@@ -48,6 +48,8 @@ class UserStatusWebSocket
     userStatusBoarder.removeOutput(userId, this)
     // and then remove all the output
     waitListActor.removeFromWaitList(userId)
+    // remove all the invite from the game
+    inviteGameActor.removeInvite(userId)
   }
 
   override def onReceive(message: String): Unit = {
